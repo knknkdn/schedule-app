@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui}[hidden]{display:none!important}</style>
+<title>جدول المحاضرات</title>
+<style>
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-arabic-500-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-arabic-600-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Reem Kufi';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/reem-kufi-arabic-600-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:'Reem Kufi';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/reem-kufi-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+</style>
+<style>
+/* Layout: one phone-width column. The weekly grid has days as rows (Saturday on top) and the seven 90-minute slots as columns; it scrolls sideways inside its own box while the day names stay pinned. */
+:root{
+  --bg:#EEF1F5; --surface:#FFFFFF; --fg:#16202E; --muted:#5B6778; --line:#D5DBE4;
+  --accent:#0E7C70; --accent-fg:#FFFFFF; --danger:#B3261E; --danger-bg:#FBE4E2; --today:#E3F1EF;
+  --c0b:#CDEBE6; --c0f:#0B4A44; --c1b:#D3E1FA; --c1f:#1B3A78; --c2b:#F6E2B3; --c2f:#6A4600; --c3b:#F7D4DA; --c3f:#7A1F34;
+  --c4b:#E1D8F6; --c4f:#43308A; --c5b:#D8E9C5; --c5f:#355A12; --c6b:#F8D9C2; --c6f:#7A3A10; --c7b:#D9DEE6; --c7f:#2E3A4D;
+  --font-body:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;
+  --font-display:'Reem Kufi','IBM Plex Sans Arabic',Tahoma,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F151D; --surface:#18212C; --fg:#E6EBF2; --muted:#93A0B2; --line:#2A3645;
+    --accent:#3CC4B2; --accent-fg:#07201C; --danger:#FF8A80; --danger-bg:#3A1D1B; --today:#1A2E2D;
+    --c0b:#14423E; --c0f:#BFE8E1; --c1b:#1D3566; --c1f:#CBDCF9; --c2b:#5B4210; --c2f:#F3DFA9; --c3b:#5E2230; --c3f:#F6CCD4;
+    --c4b:#3A2F6B; --c4f:#DDD3F5; --c5b:#2F4A17; --c5f:#D3E6BE; --c6b:#62351B; --c6f:#F6D5BC; --c7b:#343E50; --c7f:#D6DCE6;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F151D; --surface:#18212C; --fg:#E6EBF2; --muted:#93A0B2; --line:#2A3645;
+  --accent:#3CC4B2; --accent-fg:#07201C; --danger:#FF8A80; --danger-bg:#3A1D1B; --today:#1A2E2D;
+  --c0b:#14423E; --c0f:#BFE8E1; --c1b:#1D3566; --c1f:#CBDCF9; --c2b:#5B4210; --c2f:#F3DFA9; --c3b:#5E2230; --c3f:#F6CCD4;
+  --c4b:#3A2F6B; --c4f:#DDD3F5; --c5b:#2F4A17; --c5f:#D3E6BE; --c6b:#62351B; --c6f:#F6D5BC; --c7b:#343E50; --c7f:#D6DCE6;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:16px 40px}
+*{box-sizing:border-box}
+.wrap{max-width:34rem;margin-inline:auto}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3,p,ul{margin:0}
+ul{padding:0;list-style:none}
+button,input,select{font:inherit;color:inherit}
+
+.c0{background:var(--c0b);color:var(--c0f)} .c1{background:var(--c1b);color:var(--c1f)}
+.c2{background:var(--c2b);color:var(--c2f)} .c3{background:var(--c3b);color:var(--c3f)}
+.c4{background:var(--c4b);color:var(--c4f)} .c5{background:var(--c5b);color:var(--c5f)}
+.c6{background:var(--c6b);color:var(--c6f)} .c7{background:var(--c7b);color:var(--c7f)}
+
+.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.top .grow{flex:1;min-width:0}
+.top h1{font-family:var(--font-display);font-size:1.5rem;line-height:1.25;text-wrap:balance}
+.sub{color:var(--muted);font-size:.82rem;margin-top:2px}
+.logo{width:42px;height:42px;border-radius:11px;flex:none;display:block}
+.iconbtn,.back{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:44px;min-width:44px;border:1px solid var(--line);background:var(--surface);border-radius:10px;cursor:pointer;flex:none}
+.back{padding:0 12px 0 10px}
+.iconbtn svg,.back svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+html[dir="ltr"] .back svg{transform:scaleX(-1)}
+html[dir="ltr"] .back{padding:0 10px 0 12px}
+
+.btn{min-height:46px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:500}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:transparent}
+.btn.danger{background:var(--danger-bg);color:var(--danger);border-color:transparent}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.wide{width:100%}
+.acts{display:flex;gap:10px;margin-bottom:14px}
+.acts .btn{flex:1}
+
+.note{background:var(--today);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:.85rem}
+
+.gridbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.scroll{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+.grid{display:grid;min-width:37rem;grid-template-columns:3.4rem repeat(7,minmax(4.8rem,1fr));grid-template-rows:3rem repeat(6,minmax(3.7rem,auto));gap:1px;background:var(--line)}
+.grid>*{min-width:0}
+.th,.dh,.cell,.corner{background:var(--surface)}
+.th{display:flex;flex-direction:column;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;line-height:1.25}
+.th b{font-size:.8rem;font-weight:600}
+.th span{font-size:.68rem;color:var(--muted)}
+.dh,.corner{position:sticky;inset-inline-start:0;z-index:3;box-shadow:1px 0 0 var(--line)}
+html[dir="rtl"] .dh,html[dir="rtl"] .corner{box-shadow:-1px 0 0 var(--line)}
+.dh{display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;text-align:center;padding:0 2px}
+.dh.tod,.cell.tod{background:var(--today)}
+.dh.tod{color:var(--accent)}
+.block{margin:2px;padding:4px 3px;border:0;border-radius:6px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.76rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere;cursor:pointer;z-index:1}
+.empty{padding:14px 16px;color:var(--muted);font-size:.9rem;text-align:center}
+.hint{margin-top:8px;color:var(--muted);font-size:.78rem;text-align:center}
+
+.sec{margin-top:20px}
+.sec h3{font-size:.8rem;letter-spacing:.04em;color:var(--muted);margin-bottom:8px;font-weight:600}
+.crs{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:8px 12px;margin-bottom:6px;background:var(--surface);border:1px solid var(--line);border-radius:10px;cursor:pointer;text-align:start}
+.crs-n{flex:1;min-width:0;font-weight:500;overflow-wrap:anywhere}
+.crs-m{color:var(--muted);font-size:.8rem;flex:none}
+.dot{width:14px;height:14px;border-radius:4px;flex:none;border:1px solid var(--line)}
+
+form{display:flex;flex-direction:column;gap:6px}
+label,.lab{font-size:.85rem;font-weight:500}
+input,select{width:100%;min-height:46px;padding:0 12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:16px}
+select{padding-inline-end:8px}
+form>label:not(:first-child){margin-top:10px}
+.lec{margin-top:12px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.lec-t{font-size:.85rem;font-weight:600;margin-bottom:8px}
+.lec-f{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px}
+.lec-f label{display:flex;flex-direction:column;gap:4px;font-size:.75rem;color:var(--muted);min-width:0}
+.lec-f select{padding:0 6px;font-size:15px;color:var(--fg)}
+.err{margin-top:12px;padding:10px 12px;background:var(--danger-bg);color:var(--danger);border-radius:10px;font-size:.9rem;font-weight:500}
+#sub{margin-top:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:500}
+#doneWrap{margin-top:16px}
+
+.ov{position:fixed;inset:0;background:rgba(10,15,22,.55);display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.sheet{width:100%;max-width:34rem;background:var(--surface);color:var(--fg);border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.sh-h{display:flex;align-items:center;gap:10px}
+.sh-h h2{font-size:1.15rem;font-weight:600;overflow-wrap:anywhere}
+.lecs li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.92rem}
+.lecs li:last-child{border-bottom:0}
+.row{display:flex;gap:10px}
+.row .btn{flex:1}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px}
+.seg button{min-height:46px;border:1px solid var(--line);background:var(--bg);border-radius:10px;cursor:pointer;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:transparent}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.9rem;z-index:20;max-width:90%;text-align:center}
+
+#splash{position:fixed;inset:0;z-index:50;background:var(--bg);color:var(--fg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;text-align:center;transition:opacity .45s ease}
+#splash.out{opacity:0;pointer-events:none}
+.sp-logo{width:108px;height:108px;border-radius:26px;margin-bottom:14px}
+.sp-t{font-family:var(--font-display);font-size:1.9rem;line-height:1.2}
+.sp-w{font-size:1.2rem;font-weight:500;margin-top:6px}
+.sp-s{color:var(--muted);font-size:.95rem}
+.sp-bar{width:9rem;height:3px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:22px}
+.sp-bar i{display:block;height:100%;width:100%;background:var(--accent)}
+@media (prefers-reduced-motion:no-preference){
+  .toast{animation:tin .18s ease-out}
+  .sp-logo{animation:pop .6s ease-out both}
+  .sp-bar i{animation:fill 5s linear both}
+  @keyframes tin{from{opacity:0;transform:translate(-50%,6px)}}
+  @keyframes pop{from{opacity:0;transform:scale(.86)}}
+  @keyframes fill{from{width:0}}
+}
+</style>
+
+</head>
+<body>
+<div id="app" class="wrap"></div>
+<div id="layer"></div>
+<div id="toastBox"></div>
+<div id="splash" role="status">
+  <div id="spLogo"></div>
+  <div class="sp-t" id="spT"></div>
+  <div class="sp-w" id="spW"></div>
+  <div class="sp-s" id="spS"></div>
+  <div class="sp-bar"><i></i></div>
+</div>
+
+<script>
+(function(){
+  var STARTS=['8:30','10:00','11:30','1:00','2:30','4:00','5:30'];
+  var ENDS=['10:00','11:30','1:00','2:30','4:00','5:30','7:00'];
+  var KEY='jadwal-muhadarat-v1', PKEY='jadwal-prefs-v1';
+
+  var I18N={
+    ar:{
+      title:'جدول المحاضرات', sub:'من السبت إلى الخميس، كل محاضرة 90 دقيقة',
+      days:['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'],
+      short:['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'],
+      welcome:'أهلاً بك', welcomeSub:'نظّم محاضراتك بسهولة',
+      newSched:'جدول جديد', addCourse:'إضافة مادة', courses:'المواد',
+      empty:'الجدول فارغ. اضغط «إضافة مادة» لتبدأ.',
+      sample:'هذا جدول تجريبي لتشاهد الشكل. اضغط «جدول جديد» لتبدأ جدولك.',
+      hint:'اسحب الجدول جانبيًا لرؤية باقي الأوقات',
+      back:'رجوع', editTitle:'تعديل المادة', name:'اسم المادة', namePh:'مثال: الكيمياء العامة',
+      perWeek:'كم محاضرة لها في الأسبوع؟', pickCount:'اختر العدد',
+      lecN:function(i){return 'المحاضرة '+i;}, day:'اليوم', from:'من', to:'إلى', pick:'اختر',
+      add:'إضافة', save:'حفظ التعديل', view:'عرض الجدول', inNow:'في الجدول الآن',
+      edit:'تعديل', del:'حذف', close:'إغلاق', cancel:'إلغاء', delFinal:'حذف نهائي',
+      delQ:function(n,k){return 'حذف مادة «'+n+'» مع كل محاضراتها ('+k+')؟';},
+      newQ:function(k){return 'سيتم حذف الجدول الحالي ('+k+' مواد). هل تريد البدء بجدول جديد؟';},
+      lecWord:function(n){return n===1?'محاضرة':n===2?'محاضرتان':'محاضرات';},
+      span:function(s,e){return 'من '+STARTS[s]+' إلى '+ENDS[e];},
+      errName:'اكتب اسم المادة.', errCount:'اختر عدد المحاضرات في الأسبوع.',
+      errFill:function(i){return 'أكمل اليوم والوقت للمحاضرة '+i+'.';},
+      conflictSelf:function(a,b){return 'تعارض بين محاضرتين لنفس المادة: '+a+' و'+b+'.';},
+      conflict:function(a,n,b){return 'تعارض: '+a+' يتداخل مع مادة «'+n+'» ('+b+'). غيّر اليوم أو الوقت.';},
+      tEdit:'تم حفظ التعديل', tAdd:function(n){return 'أضيفت مادة '+n;}, tDel:function(n){return 'حذفت مادة '+n;},
+      settings:'الإعدادات', language:'اللغة', theme:'المظهر', auto:'تلقائي', light:'فاتح', dark:'داكن'
+    },
+    en:{
+      title:'Lecture Schedule', sub:'Saturday to Thursday, 90 minutes per lecture',
+      days:['Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday'],
+      short:['Sat','Sun','Mon','Tue','Wed','Thu'],
+      welcome:'Welcome', welcomeSub:'Organize your lectures with ease',
+      newSched:'New schedule', addCourse:'Add course', courses:'Courses',
+      empty:'The schedule is empty. Tap Add course to start.',
+      sample:'This is a sample schedule so you can see the layout. Tap New schedule to start your own.',
+      hint:'Swipe the table sideways to see the other times',
+      back:'Back', editTitle:'Edit course', name:'Course name', namePh:'Example: General Chemistry',
+      perWeek:'How many lectures per week?', pickCount:'Choose a number',
+      lecN:function(i){return 'Lecture '+i;}, day:'Day', from:'From', to:'To', pick:'Select',
+      add:'Add', save:'Save changes', view:'View schedule', inNow:'In the schedule now',
+      edit:'Edit', del:'Delete', close:'Close', cancel:'Cancel', delFinal:'Delete for good',
+      delQ:function(n,k){return 'Delete '+n+' and all of its lectures ('+k+')?';},
+      newQ:function(k){return 'The current schedule ('+k+' courses) will be deleted. Start a new schedule?';},
+      lecWord:function(n){return n===1?'lecture':'lectures';},
+      span:function(s,e){return STARTS[s]+' to '+ENDS[e];},
+      errName:'Enter the course name.', errCount:'Choose how many lectures per week.',
+      errFill:function(i){return 'Complete the day and time for lecture '+i+'.';},
+      conflictSelf:function(a,b){return 'Two lectures of the same course overlap: '+a+' and '+b+'.';},
+      conflict:function(a,n,b){return 'Conflict: '+a+' overlaps with '+n+' ('+b+'). Change the day or time.';},
+      tEdit:'Changes saved', tAdd:function(n){return n+' added';}, tDel:function(n){return n+' deleted';},
+      settings:'Settings', language:'Language', theme:'Appearance', auto:'Auto', light:'Light', dark:'Dark'
+    }
+  };
+
+  var app=document.getElementById('app'), layer=document.getElementById('layer'), toastBox=document.getElementById('toastBox'), splash=document.getElementById('splash');
+  var S={courses:[],sample:false}, fm=null, view='main', splashOn=true, themeSet=false;
+  var P={lang:'ar',theme:'auto'}, T=I18N.ar;
+
+  function loadPrefs(){
+    try{var r=localStorage.getItem(PKEY); if(r){var o=JSON.parse(r); if(o&&I18N[o.lang]) P.lang=o.lang; if(o&&(o.theme==='auto'||o.theme==='light'||o.theme==='dark')) P.theme=o.theme;}}catch(e){}
+  }
+  function savePrefs(){try{localStorage.setItem(PKEY,JSON.stringify(P));}catch(e){}}
+  function applyPrefs(){
+    var h=document.documentElement;
+    T=I18N[P.lang];
+    h.setAttribute('lang',P.lang); h.setAttribute('dir',P.lang==='ar'?'rtl':'ltr');
+    if(P.theme==='auto'){ if(themeSet){h.removeAttribute('data-theme');themeSet=false;} }
+    else{h.setAttribute('data-theme',P.theme);themeSet=true;}
+    document.title=T.title;
+  }
+
+  function logo(cls){
+    return '<svg class="'+cls+'" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="23" fill="#0E7C70"/>'+
+      '<g fill="#fff" opacity=".9"><circle cx="20" cy="23" r="2.6"/><circle cx="30" cy="23" r="2.6"/><circle cx="40" cy="23" r="2.6"/><circle cx="50" cy="23" r="2.6"/><circle cx="60" cy="23" r="2.6"/><circle cx="70" cy="23" r="2.6"/><circle cx="80" cy="23" r="2.6"/></g>'+
+      '<rect x="17" y="36" width="38" height="10" rx="5" fill="#CDEBE6"/><rect x="61" y="36" width="22" height="10" rx="5" fill="#F6E2B3"/>'+
+      '<rect x="27" y="51" width="26" height="10" rx="5" fill="#F7D4DA"/><rect x="59" y="51" width="24" height="10" rx="5" fill="#D3E1FA"/>'+
+      '<rect x="17" y="66" width="22" height="10" rx="5" fill="#D3E1FA"/><rect x="45" y="66" width="38" height="10" rx="5" fill="#CDEBE6"/></svg>';
+  }
+  function renderSplash(){
+    document.getElementById('spLogo').innerHTML=logo('sp-logo');
+    document.getElementById('spT').textContent=T.title;
+    document.getElementById('spW').textContent=T.welcome;
+    document.getElementById('spS').textContent=T.welcomeSub;
+  }
+
+  function sampleData(){
+    return [
+      {id:'s1',name:'الرياضيات',color:0,lec:[{d:0,s:0,e:0},{d:2,s:0,e:0}]},
+      {id:'s2',name:'الفيزياء',color:1,lec:[{d:0,s:1,e:1},{d:3,s:2,e:2}]},
+      {id:'s3',name:'البرمجة',color:2,lec:[{d:1,s:1,e:2},{d:4,s:0,e:0}]},
+      {id:'s4',name:'اللغة الإنجليزية',color:3,lec:[{d:2,s:3,e:3},{d:5,s:1,e:1}]},
+      {id:'s5',name:'الإحصاء',color:4,lec:[{d:3,s:4,e:4}]}
+    ];
+  }
+  function load(){
+    try{
+      var r=localStorage.getItem(KEY);
+      if(r){var o=JSON.parse(r); if(o&&Array.isArray(o.courses)){S=o;return;}}
+    }catch(e){}
+    S={courses:sampleData(),sample:true};
+  }
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+  function esc(s){return String(s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
+  function find(id){for(var i=0;i<S.courses.length;i++)if(S.courses[i].id===id)return S.courses[i];return null;}
+  function range(l){return T.days[l.d]+(P.lang==='ar'?' ':', ')+T.span(l.s,l.e);}
+  function nextColor(){
+    var cnt=[0,0,0,0,0,0,0,0];
+    S.courses.forEach(function(c){cnt[c.color]++;});
+    var best=0; for(var i=1;i<8;i++)if(cnt[i]<cnt[best])best=i;
+    return best;
+  }
+  function ov(a,b){return a.d===b.d && !(a.e<b.s || b.e<a.s);}
+  function findConflict(lecs,ignoreId){
+    for(var i=0;i<lecs.length;i++){
+      for(var j=i+1;j<lecs.length;j++) if(ov(lecs[i],lecs[j])) return {a:lecs[i],b:lecs[j],self:true};
+      for(var k=0;k<S.courses.length;k++){
+        var c=S.courses[k]; if(c.id===ignoreId) continue;
+        for(var m=0;m<c.lec.length;m++) if(ov(lecs[i],c.lec[m])) return {a:lecs[i],b:c.lec[m],course:c};
+      }
+    }
+    return null;
+  }
+  function toast(t){
+    toastBox.innerHTML='<div class="toast" role="status">'+esc(t)+'</div>';
+    setTimeout(function(){toastBox.innerHTML='';},2400);
+  }
+
+  /* ---------- main view ---------- */
+  function main(){layer.innerHTML='';renderMain();}
+  function renderMain(){
+    view='main'; fm=null;
+    var today=(new Date().getDay()+1)%7;
+    var g='<div class="corner" style="grid-row:1;grid-column:1"></div>';
+    STARTS.forEach(function(t,i){g+='<div class="th" style="grid-row:1;grid-column:'+(i+2)+'"><b>'+t+'</b><span>'+ENDS[i]+'</span></div>';});
+    T.short.forEach(function(n,d){g+='<div class="dh'+(d===today?' tod':'')+'" style="grid-row:'+(d+2)+';grid-column:1">'+n+'</div>';});
+    for(var d=0;d<6;d++)for(var s=0;s<7;s++)g+='<div class="cell'+(d===today?' tod':'')+'" style="grid-row:'+(d+2)+';grid-column:'+(s+2)+'"></div>';
+    S.courses.forEach(function(c){
+      c.lec.forEach(function(l){
+        g+='<button class="block c'+c.color+'" data-act="sheet" data-id="'+c.id+'" style="grid-row:'+(l.d+2)+';grid-column:'+(l.s+2)+' / span '+(l.e-l.s+1)+'">'+esc(c.name)+'</button>';
+      });
+    });
+    var list=S.courses.map(function(c){
+      return '<button class="crs" data-act="sheet" data-id="'+c.id+'"><span class="dot c'+c.color+'"></span><span class="crs-n">'+esc(c.name)+'</span><span class="crs-m">'+c.lec.length+' '+T.lecWord(c.lec.length)+'</span></button>';
+    }).join('');
+    app.innerHTML=
+      '<header class="top">'+logo('logo')+'<div class="grow"><h1>'+T.title+'</h1><p class="sub">'+T.sub+'</p></div>'+
+        '<button class="iconbtn" data-act="settings" aria-label="'+T.settings+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></svg></button></header>'+
+      (S.sample?'<div class="note">'+T.sample+'</div>':'')+
+      '<div class="acts"><button class="btn primary" data-act="new">'+T.newSched+'</button><button class="btn" data-act="add">'+T.addCourse+'</button></div>'+
+      '<div class="gridbox"><div class="scroll"><div class="grid">'+g+'</div></div>'+(S.courses.length?'':'<p class="empty">'+T.empty+'</p>')+'</div>'+
+      '<p class="hint">'+T.hint+'</p>'+
+      (S.courses.length?'<section class="sec"><h3>'+T.courses+' ('+S.courses.length+')</h3>'+list+'</section>':'');
+  }
+
+  /* ---------- sheets ---------- */
+  function sheet(id){
+    var c=find(id); if(!c) return;
+    var ls=c.lec.slice().sort(function(a,b){return a.d-b.d||a.s-b.s;});
+    layer.innerHTML='<div class="ov" data-act="ovclose"><div class="sheet" role="dialog" aria-label="'+esc(c.name)+'">'+
+      '<div class="sh-h"><span class="dot c'+c.color+'"></span><h2>'+esc(c.name)+'</h2></div>'+
+      '<ul class="lecs">'+ls.map(function(l){return '<li><span>'+T.days[l.d]+'</span><span>'+T.span(l.s,l.e)+'</span></li>';}).join('')+'</ul>'+
+      '<div class="row"><button class="btn" data-act="edit" data-id="'+c.id+'">'+T.edit+'</button><button class="btn danger" data-act="askdel" data-id="'+c.id+'">'+T.del+'</button></div>'+
+      '<button class="btn ghost" data-act="close">'+T.close+'</button></div></div>';
+  }
+  function askDelete(id){
+    var c=find(id); if(!c) return;
+    layer.innerHTML='<div class="ov" data-act="ovclose"><div class="sheet" role="alertdialog" aria-label="'+T.del+'">'+
+      '<p>'+esc(T.delQ(c.name,c.lec.length))+'</p>'+
+      '<div class="row"><button class="btn danger" data-act="del" data-id="'+c.id+'">'+T.delFinal+'</button><button class="btn" data-act="sheet" data-id="'+c.id+'">'+T.cancel+'</button></div></div></div>';
+  }
+  function askNew(){
+    layer.innerHTML='<div class="ov" data-act="ovclose"><div class="sheet" role="alertdialog" aria-label="'+T.newSched+'">'+
+      '<p>'+esc(T.newQ(S.courses.length))+'</p>'+
+      '<div class="row"><button class="btn danger" data-act="startnew">'+T.newSched+'</button><button class="btn" data-act="close">'+T.cancel+'</button></div></div></div>';
+  }
+  function settingsSheet(){
+    function seg(act,cur,items){
+      return '<div class="seg">'+items.map(function(it){return '<button data-act="'+act+'" data-v="'+it[0]+'" aria-pressed="'+(cur===it[0])+'">'+it[1]+'</button>';}).join('')+'</div>';
+    }
+    layer.innerHTML='<div class="ov" data-act="ovclose"><div class="sheet" role="dialog" aria-label="'+T.settings+'">'+
+      '<h2>'+T.settings+'</h2>'+
+      '<div class="lab">'+T.language+'</div>'+seg('lang',P.lang,[['ar','العربية'],['en','English']])+
+      '<div class="lab">'+T.theme+'</div>'+seg('theme',P.theme,[['auto',T.auto],['light',T.light],['dark',T.dark]])+
+      '<button class="btn ghost" data-act="close">'+T.close+'</button></div></div>';
+  }
+  function startNew(){S={courses:[],sample:false};save();layer.innerHTML='';openForm('new');}
+
+  /* ---------- form view ---------- */
+  var nameEl,countEl,lecsEl,errEl;
+  function opts(arr,ph){var h='<option value="">'+ph+'</option>';arr.forEach(function(t,i){h+='<option value="'+i+'">'+t+'</option>';});return h;}
+  function rowHtml(i){
+    return '<div class="lec"><div class="lec-t">'+T.lecN(i+1)+'</div><div class="lec-f">'+
+      '<label>'+T.day+'<select class="d" aria-label="'+T.lecN(i+1)+' - '+T.day+'">'+opts(T.days,T.pick)+'</select></label>'+
+      '<label>'+T.from+'<select class="s" aria-label="'+T.lecN(i+1)+' - '+T.from+'">'+opts(STARTS,T.pick)+'</select></label>'+
+      '<label>'+T.to+'<select class="e" aria-label="'+T.lecN(i+1)+' - '+T.to+'"></select></label></div></div>';
+  }
+  function fillE(row,s,e){
+    var sel=row.querySelector('.e'), h='<option value="">'+T.pick+'</option>';
+    for(var k=(s===''?0:+s);k<7;k++)h+='<option value="'+k+'">'+ENDS[k]+'</option>';
+    sel.innerHTML=h; sel.value=e;
+  }
+  function rawLecs(){
+    return [].map.call(lecsEl.querySelectorAll('.lec'),function(r){
+      return {d:r.querySelector('.d').value,s:r.querySelector('.s').value,e:r.querySelector('.e').value};
+    });
+  }
+  function buildRows(pre){
+    var n=+countEl.value||0, cur=pre||rawLecs(), h='';
+    for(var i=0;i<n;i++)h+=rowHtml(i);
+    lecsEl.innerHTML=h;
+    [].forEach.call(lecsEl.querySelectorAll('.lec'),function(r,i){
+      var v=cur[i]||{d:'',s:'',e:''};
+      r.querySelector('.d').value=v.d; r.querySelector('.s').value=v.s; fillE(r,v.s,v.e);
+    });
+  }
+  function renderAdded(){
+    var el=document.getElementById('added'); if(!el) return;
+    el.innerHTML=S.courses.length?'<h3>'+T.inNow+' ('+S.courses.length+')</h3><ul class="chips">'+S.courses.map(function(c){return '<li class="chip c'+c.color+'">'+esc(c.name)+'</li>';}).join('')+'</ul>':'';
+  }
+  function showErr(t){errEl.textContent=t;errEl.hidden=false;errEl.scrollIntoView({block:'center'});}
+  function openForm(mode,id){
+    layer.innerHTML='';
+    view='form'; fm={mode:mode,id:id||null};
+    var c=id?find(id):null;
+    var title=mode==='edit'?T.editTitle:mode==='new'?T.newSched:T.addCourse;
+    var cnt='<option value="">'+T.pickCount+'</option>';for(var i=1;i<=6;i++)cnt+='<option value="'+i+'">'+i+'</option>';
+    app.innerHTML=
+      '<header class="top"><button class="back" data-act="'+(mode==='edit'?'back':'done')+'" aria-label="'+T.back+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>'+T.back+'</button><h1>'+title+'</h1></header>'+
+      '<form id="f" novalidate>'+
+        '<label for="name">'+T.name+'</label><input id="name" type="text" autocomplete="off" placeholder="'+T.namePh+'">'+
+        '<label for="count">'+T.perWeek+'</label><select id="count">'+cnt+'</select>'+
+        '<div id="lecs"></div>'+
+        '<div id="err" class="err" role="alert" hidden></div>'+
+        '<button id="sub" type="submit" class="btn primary wide">'+(mode==='edit'?T.save:T.add)+'</button>'+
+      '</form>'+
+      (mode!=='edit'?'<section class="sec" id="added"></section><div id="doneWrap"><button class="btn wide" data-act="done">'+T.view+'</button></div>':'');
+    nameEl=document.getElementById('name');countEl=document.getElementById('count');lecsEl=document.getElementById('lecs');errEl=document.getElementById('err');
+    if(c){nameEl.value=c.name;countEl.value=c.lec.length;buildRows(c.lec.map(function(l){return {d:l.d,s:l.s,e:l.e};}));}
+    renderAdded();
+    countEl.addEventListener('change',function(){errEl.hidden=true;buildRows();});
+    nameEl.addEventListener('input',function(){errEl.hidden=true;});
+    lecsEl.addEventListener('change',function(ev){
+      errEl.hidden=true;
+      if(ev.target.classList.contains('s')){
+        var row=ev.target.closest('.lec'), s=ev.target.value, e=row.querySelector('.e').value;
+        if(s!==''&&(e===''||+e<+s)) e=s;
+        fillE(row,s,e);
+      }
+    });
+    document.getElementById('f').addEventListener('submit',function(ev){ev.preventDefault();submit();});
+    window.scrollTo(0,0);
+  }
+  function submit(){
+    var name=nameEl.value.trim(), n=+countEl.value, raw=rawLecs();
+    if(!name) return showErr(T.errName);
+    if(!n) return showErr(T.errCount);
+    for(var i=0;i<raw.length;i++) if(raw[i].d===''||raw[i].s===''||raw[i].e==='') return showErr(T.errFill(i+1));
+    var lecs=raw.map(function(r){return {d:+r.d,s:+r.s,e:+r.e};});
+    var cf=findConflict(lecs,fm.id);
+    if(cf){
+      if(cf.self) return showErr(T.conflictSelf(range(cf.a),range(cf.b)));
+      return showErr(T.conflict(range(cf.a),cf.course.name,range(cf.b)));
+    }
+    if(fm.mode==='edit'){
+      var c=find(fm.id); c.name=name; c.lec=lecs; save(); toast(T.tEdit); main();
+    }else{
+      S.courses.push({id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:name,color:nextColor(),lec:lecs});
+      save(); toast(T.tAdd(name));
+      nameEl.value='';countEl.value='';lecsEl.innerHTML='';errEl.hidden=true;renderAdded();nameEl.focus();
+    }
+  }
+
+  /* ---------- events ---------- */
+  document.addEventListener('click',function(ev){
+    var el=ev.target.closest('[data-act]'); if(!el) return;
+    var act=el.getAttribute('data-act'), id=el.getAttribute('data-id'), v=el.getAttribute('data-v');
+    if(act==='ovclose'&&ev.target!==el) return;
+    if(act==='sheet') sheet(id);
+    else if(act==='close'||act==='ovclose') layer.innerHTML='';
+    else if(act==='settings') settingsSheet();
+    else if(act==='lang'){P.lang=v;savePrefs();applyPrefs();renderMain();settingsSheet();}
+    else if(act==='theme'){P.theme=v;savePrefs();applyPrefs();settingsSheet();}
+    else if(act==='edit') openForm('edit',id);
+    else if(act==='askdel') askDelete(id);
+    else if(act==='del'){var c=find(id);S.courses=S.courses.filter(function(x){return x.id!==id;});save();layer.innerHTML='';toast(T.tDel(c?c.name:''));main();}
+    else if(act==='new'){ if(S.sample||!S.courses.length) startNew(); else askNew(); }
+    else if(act==='startnew') startNew();
+    else if(act==='add'){ if(S.sample) startNew(); else openForm('add'); }
+    else if(act==='done'||act==='back') main();
+  });
+
+  /* Android back button (only exists inside the installed app) */
+  try{
+    var A=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App;
+    if(A&&A.addListener){
+      A.addListener('backButton',function(){
+        if(splashOn) return;
+        if(layer.innerHTML){layer.innerHTML='';return;}
+        if(view==='form'){main();return;}
+        A.exitApp();
+      });
+    }
+  }catch(e){}
+
+  loadPrefs(); applyPrefs(); load(); renderSplash(); main();
+  setTimeout(function(){
+    splash.className='out';
+    setTimeout(function(){splashOn=false;if(splash.parentNode)splash.parentNode.removeChild(splash);},500);
+  },5000);
+})();
+</script>
+</body>
+</html>
