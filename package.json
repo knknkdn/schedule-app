@@ -1,14 +1,21 @@
 {
   "name": "lecture-schedule",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
+  "scripts": {
+    "prepare-web": "node scripts/prepare-web.js"
+  },
   "dependencies": {
-    "@capacitor/android": "^7.6.9",
-    "@capacitor/app": "^7.1.2",
-    "@capacitor/cli": "^7.6.9",
-    "@capacitor/core": "^7.6.9"
+    "@capacitor/android": "7.6.9",
+    "@capacitor/app": "7.1.2",
+    "@capacitor/cli": "7.6.9",
+    "@capacitor/core": "7.6.9",
+    "@capacitor/local-notifications": "7.0.7",
+    "@tesseract.js-data/ara": "1.0.0",
+    "@tesseract.js-data/eng": "1.0.0",
+    "tesseract.js": "7.0.0"
   },
   "devDependencies": {
-    "@capacitor/assets": "^3.0.5"
+    "@capacitor/assets": "3.0.5"
   }
 }

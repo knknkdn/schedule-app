@@ -16,10 +16,11 @@
 @font-face{font-family:'Reem Kufi';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/reem-kufi-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
 <style>
-/* Layout: one phone-width column. The weekly grid has days as rows (Saturday on top) and the seven 90-minute slots as columns; it scrolls sideways inside its own box while the day names stay pinned. */
+/* Layout: one phone-width column with a side drawer. The weekly grid has the chosen days as rows and the user's own time slots as columns; the exam table lists each date of the exam period as a row, grouped by week. */
 :root{
   --bg:#EEF1F5; --surface:#FFFFFF; --fg:#16202E; --muted:#5B6778; --line:#D5DBE4;
   --accent:#0E7C70; --accent-fg:#FFFFFF; --danger:#B3261E; --danger-bg:#FBE4E2; --today:#E3F1EF;
+  --warn-bg:#FFF1CC; --warn-fg:#6A4600;
   --c0b:#CDEBE6; --c0f:#0B4A44; --c1b:#D3E1FA; --c1f:#1B3A78; --c2b:#F6E2B3; --c2f:#6A4600; --c3b:#F7D4DA; --c3f:#7A1F34;
   --c4b:#E1D8F6; --c4f:#43308A; --c5b:#D8E9C5; --c5f:#355A12; --c6b:#F8D9C2; --c6f:#7A3A10; --c7b:#D9DEE6; --c7f:#2E3A4D;
   --font-body:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;
@@ -29,6 +30,7 @@
   :root:not([data-theme="light"]){
     --bg:#0F151D; --surface:#18212C; --fg:#E6EBF2; --muted:#93A0B2; --line:#2A3645;
     --accent:#3CC4B2; --accent-fg:#07201C; --danger:#FF8A80; --danger-bg:#3A1D1B; --today:#1A2E2D;
+    --warn-bg:#4A3A10; --warn-fg:#F3DFA9;
     --c0b:#14423E; --c0f:#BFE8E1; --c1b:#1D3566; --c1f:#CBDCF9; --c2b:#5B4210; --c2f:#F3DFA9; --c3b:#5E2230; --c3f:#F6CCD4;
     --c4b:#3A2F6B; --c4f:#DDD3F5; --c5b:#2F4A17; --c5f:#D3E6BE; --c6b:#62351B; --c6f:#F6D5BC; --c7b:#343E50; --c7f:#D6DCE6;
     color-scheme:dark;
@@ -37,6 +39,7 @@
 :root[data-theme="dark"]{
   --bg:#0F151D; --surface:#18212C; --fg:#E6EBF2; --muted:#93A0B2; --line:#2A3645;
   --accent:#3CC4B2; --accent-fg:#07201C; --danger:#FF8A80; --danger-bg:#3A1D1B; --today:#1A2E2D;
+  --warn-bg:#4A3A10; --warn-fg:#F3DFA9;
   --c0b:#14423E; --c0f:#BFE8E1; --c1b:#1D3566; --c1f:#CBDCF9; --c2b:#5B4210; --c2f:#F3DFA9; --c3b:#5E2230; --c3f:#F6CCD4;
   --c4b:#3A2F6B; --c4f:#DDD3F5; --c5b:#2F4A17; --c5f:#D3E6BE; --c6b:#62351B; --c6f:#F6D5BC; --c7b:#343E50; --c7f:#D6DCE6;
   color-scheme:dark;
@@ -54,14 +57,14 @@ button,input,select{font:inherit;color:inherit}
 .c4{background:var(--c4b);color:var(--c4f)} .c5{background:var(--c5b);color:var(--c5f)}
 .c6{background:var(--c6b);color:var(--c6f)} .c7{background:var(--c7b);color:var(--c7f)}
 
-.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .top .grow{flex:1;min-width:0}
-.top h1{font-family:var(--font-display);font-size:1.5rem;line-height:1.25;text-wrap:balance}
+.top h1{font-family:var(--font-display);font-size:1.4rem;line-height:1.25;text-wrap:balance}
 .sub{color:var(--muted);font-size:.82rem;margin-top:2px}
-.logo{width:42px;height:42px;border-radius:11px;flex:none;display:block}
+.logo{width:40px;height:40px;border-radius:11px;flex:none;display:block}
 .iconbtn,.back{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:44px;min-width:44px;border:1px solid var(--line);background:var(--surface);border-radius:10px;cursor:pointer;flex:none}
 .back{padding:0 12px 0 10px}
-.iconbtn svg,.back svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.iconbtn svg,.back svg,.dr-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 html[dir="ltr"] .back svg{transform:scaleX(-1)}
 html[dir="ltr"] .back{padding:0 10px 0 12px}
 
@@ -70,14 +73,18 @@ html[dir="ltr"] .back{padding:0 10px 0 12px}
 .btn.danger{background:var(--danger-bg);color:var(--danger);border-color:transparent}
 .btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
 .btn.wide{width:100%}
+.btn.sm{min-height:40px;padding:0 14px;font-size:.9rem}
+.btn[disabled]{opacity:.55;cursor:default}
 .acts{display:flex;gap:10px;margin-bottom:14px}
 .acts .btn{flex:1}
 
 .note{background:var(--today);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:.85rem}
+.warn{background:var(--warn-bg);color:var(--warn-fg);border-radius:10px;padding:10px 12px;font-size:.88rem}
+.warn .btn{margin-top:8px}
 
 .gridbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .scroll{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
-.grid{display:grid;min-width:37rem;grid-template-columns:3.4rem repeat(7,minmax(4.8rem,1fr));grid-template-rows:3rem repeat(6,minmax(3.7rem,auto));gap:1px;background:var(--line)}
+.grid{display:grid;gap:1px;background:var(--line)}
 .grid>*{min-width:0}
 .th,.dh,.cell,.corner{background:var(--surface)}
 .th{display:flex;flex-direction:column;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;line-height:1.25}
@@ -88,7 +95,8 @@ html[dir="rtl"] .dh,html[dir="rtl"] .corner{box-shadow:-1px 0 0 var(--line)}
 .dh{display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;text-align:center;padding:0 2px}
 .dh.tod,.cell.tod{background:var(--today)}
 .dh.tod{color:var(--accent)}
-.block{margin:2px;padding:4px 3px;border:0;border-radius:6px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.76rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere;cursor:pointer;z-index:1}
+.block{margin:2px;padding:4px 3px;border:0;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:.76rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere;cursor:pointer;z-index:1}
+.block small{font-size:.66rem;font-weight:500;opacity:.9}
 .empty{padding:14px 16px;color:var(--muted);font-size:.9rem;text-align:center}
 .hint{margin-top:8px;color:var(--muted);font-size:.78rem;text-align:center}
 
@@ -101,32 +109,100 @@ html[dir="rtl"] .dh,html[dir="rtl"] .corner{box-shadow:-1px 0 0 var(--line)}
 
 form{display:flex;flex-direction:column;gap:6px}
 label,.lab{font-size:.85rem;font-weight:500}
+.opt{color:var(--muted);font-weight:400}
 input,select{width:100%;min-height:46px;padding:0 12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:16px}
+input[type="checkbox"]{width:20px;min-height:20px;height:20px;flex:none;accent-color:var(--accent)}
 select{padding-inline-end:8px}
 form>label:not(:first-child){margin-top:10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.two>div{display:flex;flex-direction:column;gap:6px;min-width:0}
 .lec{margin-top:12px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
 .lec-t{font-size:.85rem;font-weight:600;margin-bottom:8px}
 .lec-f{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px}
-.lec-f label{display:flex;flex-direction:column;gap:4px;font-size:.75rem;color:var(--muted);min-width:0}
+.lec-f label,.lec-r label{display:flex;flex-direction:column;gap:4px;font-size:.75rem;color:var(--muted);min-width:0}
 .lec-f select{padding:0 6px;font-size:15px;color:var(--fg)}
+.lec-r{margin-top:8px}
 .err{margin-top:12px;padding:10px 12px;background:var(--danger-bg);color:var(--danger);border-radius:10px;font-size:.9rem;font-weight:500}
 #sub{margin-top:14px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:500}
+.chip{padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.chip button{border:0;background:transparent;cursor:pointer;padding:0 2px;font-size:1rem;line-height:1;opacity:.8}
+.chip.plain{background:var(--surface);border:1px solid var(--line)}
 #doneWrap{margin-top:16px}
 
-.ov{position:fixed;inset:0;background:rgba(10,15,22,.55);display:flex;align-items:flex-end;justify-content:center;z-index:10}
-.sheet{width:100%;max-width:34rem;background:var(--surface);color:var(--fg);border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
-.sh-h{display:flex;align-items:center;gap:10px}
-.sh-h h2{font-size:1.15rem;font-weight:600;overflow-wrap:anywhere}
-.lecs li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.92rem}
-.lecs li:last-child{border-bottom:0}
-.row{display:flex;gap:10px}
-.row .btn{flex:1}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.panel h2{font-size:1rem;font-weight:600}
+.panel p{color:var(--muted);font-size:.85rem}
+.row-s{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.switch{width:50px;height:30px;border-radius:999px;border:1px solid var(--line);background:var(--bg);position:relative;cursor:pointer;flex:none;padding:0}
+.switch::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:22px;height:22px;border-radius:50%;background:var(--muted);transition:inset-inline-start .15s}
+.switch[aria-checked="true"]{background:var(--accent);border-color:transparent}
+.switch[aria-checked="true"]::after{inset-inline-start:23px;background:var(--accent-fg)}
+.add-off{display:grid;grid-template-columns:1fr 1.3fr auto;gap:8px;align-items:center}
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px}
 .seg button{min-height:46px;border:1px solid var(--line);background:var(--bg);border-radius:10px;cursor:pointer;font-weight:500}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:transparent}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.9rem;z-index:20;max-width:90%;text-align:center}
+
+.dchips{display:flex;flex-wrap:wrap;gap:8px}
+.dchip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:500}
+.dchip[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:transparent}
+.slot{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end}
+.slot label{display:flex;flex-direction:column;gap:4px;font-size:.75rem;color:var(--muted);min-width:0}
+.slot .iconbtn{min-height:46px}
+
+.wk{margin-bottom:16px}
+.wk h3{font-size:.8rem;color:var(--muted);font-weight:600;margin-bottom:6px}
+.wkbox{background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:grid;gap:1px}
+.drow{display:grid;grid-template-columns:4.6rem minmax(0,1fr);gap:1px}
+.dd{background:var(--surface);padding:8px 4px;font-size:.74rem;text-align:center;display:flex;flex-direction:column;justify-content:center;font-variant-numeric:tabular-nums}
+.dd b{font-size:.8rem}
+.dd span{color:var(--muted)}
+.dx{background:var(--surface);padding:6px;display:flex;flex-direction:column;gap:6px;min-height:2.8rem;justify-content:center}
+.dd.tod,.dx.tod{background:var(--today)}
+.dx.none::before{content:"—";color:var(--line);text-align:center}
+.xb{display:flex;flex-direction:column;align-items:flex-start;text-align:start;gap:1px;padding:7px 10px;border:0;border-radius:8px;width:100%;cursor:pointer;overflow-wrap:anywhere}
+.xb b{font-size:.9rem}
+.xb span{font-size:.75rem;opacity:.92}
+.xb.dashed{background:transparent;border:1.5px dashed currentColor}
+.tg{font-size:.68rem;padding:0 7px;border-radius:999px;background:rgba(127,127,127,.22);margin-inline-start:6px;font-weight:500;white-space:nowrap}
+.next{display:flex;flex-direction:column;gap:2px;background:var(--today);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:14px}
+.next small{color:var(--muted);font-size:.75rem}
+.next b{font-size:.95rem}
+.period{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;font-size:.88rem}
+.period span{color:var(--muted)}
+
+.prog{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.thumb{max-width:100%;max-height:14rem;border-radius:10px;border:1px solid var(--line);object-fit:contain;align-self:center}
+.res-h{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.res-h label{display:flex;align-items:center;gap:8px;font-size:.95rem;min-width:0;overflow-wrap:anywhere}
+.res .two{margin-top:2px}
+.res label.f{display:flex;flex-direction:column;gap:4px;font-size:.75rem;color:var(--muted)}
+.res .e{color:var(--danger);font-size:.82rem;font-weight:500}
+details.raw summary{cursor:pointer;font-size:.85rem;color:var(--muted)}
+details.raw pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.78rem;margin:8px 0 0;max-height:14rem;overflow:auto;direction:ltr;text-align:left}
+
+.ov{position:fixed;inset:0;background:rgba(10,15,22,.55);display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.sheet{width:100%;max-width:34rem;background:var(--surface);color:var(--fg);border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;max-height:90%;overflow-y:auto}
+.sh-h{display:flex;align-items:center;gap:10px}
+.sh-h h2{font-size:1.15rem;font-weight:600;overflow-wrap:anywhere}
+.kv li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.92rem}
+.kv li:last-child{border-bottom:0}
+.kv li span:last-child{text-align:end;color:var(--muted)}
+.row{display:flex;gap:10px}
+.row .btn{flex:1}
+
+.dov{position:fixed;inset:0;background:rgba(10,15,22,.55);z-index:30}
+.drawer{position:absolute;top:0;bottom:0;inset-inline-start:0;width:min(82vw,20rem);background:var(--surface);color:var(--fg);padding:calc(16px + env(safe-area-inset-top,0px)) 12px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:4px;overflow-y:auto;transform:translateX(100%)}
+html[dir="ltr"] .drawer{transform:translateX(-100%)}
+.drawer.open,html[dir="ltr"] .drawer.open{transform:none}
+.dr-h{display:flex;align-items:center;gap:12px;padding:4px 8px 16px}
+.dr-h b{font-family:var(--font-display);font-size:1.2rem;font-weight:600}
+.dr-item{display:flex;align-items:center;gap:12px;min-height:48px;padding:0 12px;border-radius:10px;border:0;background:transparent;width:100%;text-align:start;cursor:pointer;font-weight:500}
+.dr-item[aria-current="page"]{background:var(--today);color:var(--accent)}
+.dr-sep{height:1px;background:var(--line);margin:8px 4px}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.9rem;z-index:60;max-width:90%;text-align:center}
 
 #splash{position:fixed;inset:0;z-index:50;background:var(--bg);color:var(--fg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;text-align:center;transition:opacity .45s ease}
 #splash.out{opacity:0;pointer-events:none}
@@ -140,6 +216,7 @@ form>label:not(:first-child){margin-top:10px}
   .toast{animation:tin .18s ease-out}
   .sp-logo{animation:pop .6s ease-out both}
   .sp-bar i{animation:fill 5s linear both}
+  .drawer{transition:transform .2s ease-out}
   @keyframes tin{from{opacity:0;transform:translate(-50%,6px)}}
   @keyframes pop{from{opacity:0;transform:scale(.86)}}
   @keyframes fill{from{width:0}}
@@ -161,80 +238,407 @@ form>label:not(:first-child){margin-top:10px}
 
 <script>
 (function(){
-  var STARTS=['8:30','10:00','11:30','1:00','2:30','4:00','5:30'];
-  var ENDS=['10:00','11:30','1:00','2:30','4:00','5:30','7:00'];
-  var KEY='jadwal-muhadarat-v1', PKEY='jadwal-prefs-v1';
+  'use strict';
+  var KEY='jadwal-v2', KEY1='jadwal-muhadarat-v1', PKEY='jadwal-prefs-v2', PKEY1='jadwal-prefs-v1';
+
+  /* ================= text ================= */
+  var DAYS_AR=['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+  var DAYS_EN=['Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday','Friday'];
+  var SHORT_EN=['Sat','Sun','Mon','Tue','Wed','Thu','Fri'];
+  function durAr(n,u){
+    var one={m:'دقيقة',h:'ساعة',d:'يوم'}[u], two={m:'دقيقتين',h:'ساعتين',d:'يومين'}[u];
+    var few={m:'دقائق',h:'ساعات',d:'أيام'}[u], many={m:'دقيقة',h:'ساعة',d:'يومًا'}[u];
+    if(n===1) return one; if(n===2) return two; if(n>=3&&n<=10) return n+' '+few; return n+' '+many;
+  }
+  function durEn(n,u){var w={m:'minute',h:'hour',d:'day'}[u];return n+' '+w+(n===1?'':'s');}
+  function splitDur(min){
+    if(min%1440===0) return {n:min/1440,u:'d'};
+    if(min%60===0) return {n:min/60,u:'h'};
+    return {n:min,u:'m'};
+  }
 
   var I18N={
     ar:{
-      title:'جدول المحاضرات', sub:'من السبت إلى الخميس، كل محاضرة 90 دقيقة',
-      days:['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'],
-      short:['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'],
-      welcome:'أهلاً بك', welcomeSub:'نظّم محاضراتك بسهولة',
+      title:'جدول المحاضرات', sub:'جدولك الأسبوعي', welcome:'أهلاً بك', welcomeSub:'نظّم محاضراتك بسهولة', am:'ص', pm:'م',
+      days:DAYS_AR, short:DAYS_AR,
+      menu:'القائمة', mSchedule:'الجدول', mExams:'امتحاناتي', mNew:'جدول جديد', mNotif:'التنبيهات', mSettings:'الإعدادات',
       newSched:'جدول جديد', addCourse:'إضافة مادة', courses:'المواد',
       empty:'الجدول فارغ. اضغط «إضافة مادة» لتبدأ.',
       sample:'هذا جدول تجريبي لتشاهد الشكل. اضغط «جدول جديد» لتبدأ جدولك.',
       hint:'اسحب الجدول جانبيًا لرؤية باقي الأوقات',
       back:'رجوع', editTitle:'تعديل المادة', name:'اسم المادة', namePh:'مثال: الكيمياء العامة',
+      code:'رمز المادة', codePh:'مثال: CHEM101', optional:'(اختياري)', midDate:'تاريخ الامتحان الجزئي', finDate:'تاريخ الامتحان النهائي',
       perWeek:'كم محاضرة لها في الأسبوع؟', pickCount:'اختر العدد',
-      lecN:function(i){return 'المحاضرة '+i;}, day:'اليوم', from:'من', to:'إلى', pick:'اختر',
+      lecN:function(i){return 'المحاضرة '+i;}, day:'اليوم', from:'من', to:'إلى', pick:'اختر', room:'القاعة', roomPh:'مثال: قاعة 12',
       add:'إضافة', save:'حفظ التعديل', view:'عرض الجدول', inNow:'في الجدول الآن',
-      edit:'تعديل', del:'حذف', close:'إغلاق', cancel:'إلغاء', delFinal:'حذف نهائي',
+      edit:'تعديل', del:'حذف', close:'إغلاق', cancel:'إلغاء', delFinal:'حذف نهائي', roomLbl:function(r){return 'القاعة: '+r;},
       delQ:function(n,k){return 'حذف مادة «'+n+'» مع كل محاضراتها ('+k+')؟';},
-      newQ:function(k){return 'سيتم حذف الجدول الحالي ('+k+' مواد). هل تريد البدء بجدول جديد؟';},
+      newQ:function(k){return 'سيتم حذف المواد الحالية ('+k+') عند إنشاء الجدول الجديد. هل تريد المتابعة؟ امتحاناتك لن تتأثر.';},
       lecWord:function(n){return n===1?'محاضرة':n===2?'محاضرتان':'محاضرات';},
-      span:function(s,e){return 'من '+STARTS[s]+' إلى '+ENDS[e];},
+      span:function(s,e){return 'من '+s+' إلى '+e;},
       errName:'اكتب اسم المادة.', errCount:'اختر عدد المحاضرات في الأسبوع.',
       errFill:function(i){return 'أكمل اليوم والوقت للمحاضرة '+i+'.';},
       conflictSelf:function(a,b){return 'تعارض بين محاضرتين لنفس المادة: '+a+' و'+b+'.';},
       conflict:function(a,n,b){return 'تعارض: '+a+' يتداخل مع مادة «'+n+'» ('+b+'). غيّر اليوم أو الوقت.';},
+      errDupCourse:function(n){return 'المادة «'+n+'» موجودة في الجدول. لا يمكن إضافتها مرتين.';},
+      errMidFin:'تاريخ الامتحان النهائي يجب أن يكون بعد الجزئي.',
       tEdit:'تم حفظ التعديل', tAdd:function(n){return 'أضيفت مادة '+n;}, tDel:function(n){return 'حذفت مادة '+n;},
-      settings:'الإعدادات', language:'اللغة', theme:'المظهر', auto:'تلقائي', light:'فاتح', dark:'داكن'
+      settings:'الإعدادات', language:'اللغة', theme:'المظهر', auto:'تلقائي', light:'فاتح', dark:'داكن', timeFmt:'شكل الوقت', h12:'12 ساعة', h24:'24 ساعة',
+      wTitle:'جدول جديد', wIntro:'اختر أيام الدراسة وأوقات المحاضرات. كل فترة تحدد ساعتها ودقائقها كما تريد.',
+      wDays:'أيام الأسبوع', wSlots:'الأوقات', wAddSlot:'إضافة وقت', wDefault:'الأوقات الافتراضية', wCreate:'إنشاء الجدول', wSlotN:function(i){return 'الفترة '+i;}, wDel:'حذف الفترة',
+      errWDays:'اختر يومًا واحدًا على الأقل.', errWSlots:'أضف وقتًا واحدًا على الأقل.',
+      errWTime:function(i){return 'أكمل وقت البداية والنهاية للفترة '+i+'، ويجب أن تنتهي بعد أن تبدأ.';},
+      errWOverlap:function(i,j){return 'الفترتان '+i+' و'+j+' متداخلتان. اجعل كل فترة تبدأ بعد انتهاء التي قبلها.';},
+      xTitle:'امتحاناتي', xAdd:'إضافة امتحان', xPhoto:'من صورة', xPeriod:'فترة الامتحانات', xPeriodNone:'لم تحدد بعد', xPeriodEdit:'تحديد',
+      xPeriodHint:'حدد أول يوم وآخر يوم في الامتحانات ليُبنى الجدول بالتواريخ.', xFrom:'من تاريخ', xTo:'إلى تاريخ', xSave:'حفظ', xClear:'مسح الفترة',
+      xEmpty:'لا توجد امتحانات بعد. أضفها يدويًا أو من صورة جدول الكلية.',
+      xWeek:function(n,a,b){return 'الأسبوع '+n+' · '+a+' – '+b;}, xMid:'جزئي', xFin:'نهائي', xType:'نوع الامتحان', xDate:'التاريخ', xNoTime:'بدون وقت',
+      xNext:'الامتحان القادم', xToday:'اليوم', xTomorrow:'غدًا', xInDays:function(n){return 'بعد '+durAr(n,'d');},
+      xAddTitle:'إضافة امتحان', xEditTitle:'تعديل الامتحان', xCourse:'المادة', xCoursePh:'اختر من جدولك أو اكتب الاسم',
+      xDerivedNote:'هذا التاريخ مأخوذ من بيانات المادة ولا يحتوي وقتًا. أضف الوقت والقاعة ليظهر كاملًا.', xSetTime:'إضافة الوقت والقاعة', xEditCourse:'تعديل المادة',
+      errXName:'اكتب اسم المادة.', errXDate:'اختر تاريخ الامتحان.', errXTime:'حدد وقت بداية الامتحان ونهايته.', errXOrder:'يجب أن ينتهي الامتحان بعد أن يبدأ.',
+      errDupExam:function(n,t){return 'امتحان '+t+' لمادة «'+n+'» مضاف مسبقًا. لا يمكن إضافة المادة مرتين.';},
+      errXConflict:function(n,r){return 'تعارض: يتداخل مع امتحان «'+n+'» ('+r+') في نفس اليوم.';},
+      tXAdded:function(n){return 'أضيف امتحان '+n;}, tXSaved:'تم حفظ الامتحان', tXDel:'حذف الامتحان', tPeriod:'تم حفظ الفترة',
+      xDelQ:function(n){return 'حذف امتحان «'+n+'»؟';}, errPeriod:'تاريخ البداية يجب أن يسبق النهاية.',
+      oTitle:'امتحانات من صورة', oIntro:'ارفع صورة جدول امتحانات الكلية، وأدخل رموز موادك. سيبحث التطبيق عنها في الصورة ويستخرج التاريخ والوقت والقاعة. راجع النتيجة قبل الإضافة.',
+      oPick:'اختيار صورة الجدول', oChange:'تغيير الصورة', oType:'نوع الامتحانات في الصورة', oCodes:'رموز موادك', oCodePh:'مثال: CS101',
+      oAddCode:'إضافة', oUseAra:'الجدول يحتوي نصًا عربيًا (أبطأ قليلًا)', oRun:'ابحث وأنشئ جدولي',
+      oNoCodes:'أدخل رمز مادة واحدًا على الأقل.', oNoImage:'اختر صورة الجدول أولًا.',
+      oNotReady:'قراءة الصور متوفرة داخل التطبيق المثبّت على الهاتف فقط.',
+      oPrep:'جارٍ التحضير…', oReading:function(p){return 'جارٍ قراءة الصورة '+p+'%';},
+      oResult:'النتيجة', oResultHint:'راجع كل مادة وصحّح ما تحتاجه، ثم أضف المحدد.', oFound:'وُجدت في الصورة', oMissing:'لم أجد هذا الرمز في الصورة',
+      oIncl:'تضمين', oRaw:'النص الذي قرأه التطبيق', oConfirm:function(n){return 'إضافة المحدد إلى امتحاناتي ('+n+')';},
+      oFill:'أكمل التاريخ والوقت.', oAdded:function(n){return n===1?'أضيف امتحان واحد':n===2?'أضيف امتحانان':n<=10?'أضيفت '+n+' امتحانات':'أضيف '+n+' امتحانًا';}, oGuessEnd:'وقت النهاية غير ظاهر في الصورة، تم افتراضه بعد ساعتين.',
+      oFail:'تعذر قراءة الصورة. جرّب صورة أوضح.',
+      nTitle:'التنبيهات', nOnlyApp:'التنبيهات تعمل داخل تطبيق الأندرويد المثبّت فقط، ولا تظهر في هذه المعاينة.',
+      nPermNo:'التطبيق غير مسموح له بإرسال الإشعارات. فعّلها من إعدادات الهاتف ثم عد إلى هنا.', nAllow:'السماح بالإشعارات',
+      nExact:'لتصل التنبيهات في وقتها بالدقيقة، اسمح للتطبيق بالمنبهات الدقيقة من إعدادات الهاتف.', nExactBtn:'فتح الإعداد',
+      nLec:'تنبيهات المحاضرات', nExam:'تنبيهات الامتحانات', nLecHint:'يصلك إشعار قبل كل محاضرة في كل أسبوع.', nExamHint:'يصلك إشعار قبل كل امتحان له وقت. الامتحان الذي له تاريخ فقط ينبّهك مساء اليوم السابق.',
+      nBefore:function(d){return 'قبل '+d;}, nAddOff:'إضافة وقت تنبيه', nMin:'دقيقة', nHour:'ساعة', nDay:'يوم', nAddBtn:'إضافة', nNoOffs:'لا توجد أوقات تنبيه. أضف وقتًا.',
+      nTest:'إرسال تنبيه تجريبي بعد 5 ثوانٍ', nTestSent:'سيصلك التنبيه بعد 5 ثوانٍ. اخرج من التطبيق لترى الإشعار.', nBadOff:'اكتب رقمًا صحيحًا أكبر من صفر.',
+      nLecT:function(n,d){return d===null?'محاضرة «'+n+'» تبدأ الآن':'محاضرة «'+n+'» بعد '+d;},
+      nExamT:function(n,t,d){return d===null?'امتحان '+t+' «'+n+'» يبدأ الآن':'امتحان '+t+' «'+n+'» بعد '+d;},
+      nExamDayBefore:function(n,t){return 'غدًا امتحان '+t+' «'+n+'»';}
     },
     en:{
-      title:'Lecture Schedule', sub:'Saturday to Thursday, 90 minutes per lecture',
-      days:['Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday'],
-      short:['Sat','Sun','Mon','Tue','Wed','Thu'],
-      welcome:'Welcome', welcomeSub:'Organize your lectures with ease',
+      title:'Lecture Schedule', sub:'Your weekly timetable', welcome:'Welcome', welcomeSub:'Organize your lectures with ease', am:'AM', pm:'PM',
+      days:DAYS_EN, short:SHORT_EN,
+      menu:'Menu', mSchedule:'Schedule', mExams:'My exams', mNew:'New schedule', mNotif:'Reminders', mSettings:'Settings',
       newSched:'New schedule', addCourse:'Add course', courses:'Courses',
       empty:'The schedule is empty. Tap Add course to start.',
       sample:'This is a sample schedule so you can see the layout. Tap New schedule to start your own.',
       hint:'Swipe the table sideways to see the other times',
       back:'Back', editTitle:'Edit course', name:'Course name', namePh:'Example: General Chemistry',
+      code:'Course code', codePh:'Example: CHEM101', optional:'(optional)', midDate:'Midterm exam date', finDate:'Final exam date',
       perWeek:'How many lectures per week?', pickCount:'Choose a number',
-      lecN:function(i){return 'Lecture '+i;}, day:'Day', from:'From', to:'To', pick:'Select',
+      lecN:function(i){return 'Lecture '+i;}, day:'Day', from:'From', to:'To', pick:'Select', room:'Room', roomPh:'Example: Room 12',
       add:'Add', save:'Save changes', view:'View schedule', inNow:'In the schedule now',
-      edit:'Edit', del:'Delete', close:'Close', cancel:'Cancel', delFinal:'Delete for good',
+      edit:'Edit', del:'Delete', close:'Close', cancel:'Cancel', delFinal:'Delete for good', roomLbl:function(r){return 'Room: '+r;},
       delQ:function(n,k){return 'Delete '+n+' and all of its lectures ('+k+')?';},
-      newQ:function(k){return 'The current schedule ('+k+' courses) will be deleted. Start a new schedule?';},
+      newQ:function(k){return 'Your current courses ('+k+') will be deleted when the new schedule is created. Continue? Your exams are not affected.';},
       lecWord:function(n){return n===1?'lecture':'lectures';},
-      span:function(s,e){return STARTS[s]+' to '+ENDS[e];},
+      span:function(s,e){return s+' to '+e;},
       errName:'Enter the course name.', errCount:'Choose how many lectures per week.',
       errFill:function(i){return 'Complete the day and time for lecture '+i+'.';},
       conflictSelf:function(a,b){return 'Two lectures of the same course overlap: '+a+' and '+b+'.';},
       conflict:function(a,n,b){return 'Conflict: '+a+' overlaps with '+n+' ('+b+'). Change the day or time.';},
+      errDupCourse:function(n){return n+' is already in the schedule. A course cannot be added twice.';},
+      errMidFin:'The final exam date must be after the midterm.',
       tEdit:'Changes saved', tAdd:function(n){return n+' added';}, tDel:function(n){return n+' deleted';},
-      settings:'Settings', language:'Language', theme:'Appearance', auto:'Auto', light:'Light', dark:'Dark'
+      settings:'Settings', language:'Language', theme:'Appearance', auto:'Auto', light:'Light', dark:'Dark', timeFmt:'Time format', h12:'12-hour', h24:'24-hour',
+      wTitle:'New schedule', wIntro:'Choose the study days and the lecture times. Set each time slot to the exact hour and minute.',
+      wDays:'Days of the week', wSlots:'Time slots', wAddSlot:'Add a time', wDefault:'Default times', wCreate:'Create schedule', wSlotN:function(i){return 'Slot '+i;}, wDel:'Delete slot',
+      errWDays:'Choose at least one day.', errWSlots:'Add at least one time slot.',
+      errWTime:function(i){return 'Complete the start and end time of slot '+i+'. It must end after it starts.';},
+      errWOverlap:function(i,j){return 'Slots '+i+' and '+j+' overlap. Each slot must start after the previous one ends.';},
+      xTitle:'My exams', xAdd:'Add exam', xPhoto:'From a photo', xPeriod:'Exam period', xPeriodNone:'Not set yet', xPeriodEdit:'Set',
+      xPeriodHint:'Set the first and last day of the exams to build the table by date.', xFrom:'From date', xTo:'To date', xSave:'Save', xClear:'Clear period',
+      xEmpty:'No exams yet. Add them manually or from a photo of the faculty timetable.',
+      xWeek:function(n,a,b){return 'Week '+n+' · '+a+' – '+b;}, xMid:'Midterm', xFin:'Final', xType:'Exam type', xDate:'Date', xNoTime:'No time',
+      xNext:'Next exam', xToday:'Today', xTomorrow:'Tomorrow', xInDays:function(n){return 'In '+durEn(n,'d');},
+      xAddTitle:'Add exam', xEditTitle:'Edit exam', xCourse:'Course', xCoursePh:'Pick from your schedule or type the name',
+      xDerivedNote:'This date comes from the course details and has no time. Add the time and room to complete it.', xSetTime:'Add time and room', xEditCourse:'Edit course',
+      errXName:'Enter the course name.', errXDate:'Choose the exam date.', errXTime:'Set the exam start and end time.', errXOrder:'The exam must end after it starts.',
+      errDupExam:function(n,t){return 'A '+t+' exam for '+n+' already exists. A course cannot be added twice.';},
+      errXConflict:function(n,r){return 'Conflict: it overlaps the '+n+' exam ('+r+') on the same day.';},
+      tXAdded:function(n){return n+' exam added';}, tXSaved:'Exam saved', tXDel:'Exam deleted', tPeriod:'Period saved',
+      xDelQ:function(n){return 'Delete the '+n+' exam?';}, errPeriod:'The start date must come before the end date.',
+      oTitle:'Exams from a photo', oIntro:'Upload a photo of the faculty exam timetable and enter your course codes. The app looks for them in the photo and extracts the date, time and room. Review the result before adding.',
+      oPick:'Choose the timetable photo', oChange:'Change photo', oType:'Exam type in the photo', oCodes:'Your course codes', oCodePh:'Example: CS101',
+      oAddCode:'Add', oUseAra:'The timetable contains Arabic text (a bit slower)', oRun:'Find and build my table',
+      oNoCodes:'Enter at least one course code.', oNoImage:'Choose the timetable photo first.',
+      oNotReady:'Photo reading works only inside the installed phone app.',
+      oPrep:'Preparing…', oReading:function(p){return 'Reading the photo '+p+'%';},
+      oResult:'Result', oResultHint:'Review each course, fix what is needed, then add the selected ones.', oFound:'Found in the photo', oMissing:'This code was not found in the photo',
+      oIncl:'Include', oRaw:'Text the app read', oConfirm:function(n){return 'Add selected to My exams ('+n+')';},
+      oFill:'Complete the date and time.', oAdded:function(n){return n+(n===1?' exam added':' exams added');}, oGuessEnd:'The end time is not visible in the photo. It was assumed to be 2 hours later.',
+      oFail:'Could not read the photo. Try a clearer one.',
+      nTitle:'Reminders', nOnlyApp:'Reminders work only inside the installed Android app and do not appear in this preview.',
+      nPermNo:'The app is not allowed to send notifications. Turn them on in the phone settings, then come back.', nAllow:'Allow notifications',
+      nExact:'To get reminders on the exact minute, allow the app to use exact alarms in the phone settings.', nExactBtn:'Open setting',
+      nLec:'Lecture reminders', nExam:'Exam reminders', nLecHint:'You get a notification before every lecture, every week.', nExamHint:'You get a notification before each exam that has a time. An exam with only a date reminds you the evening before.',
+      nBefore:function(d){return d+' before';}, nAddOff:'Add a reminder time', nMin:'minutes', nHour:'hours', nDay:'days', nAddBtn:'Add', nNoOffs:'No reminder times. Add one.',
+      nTest:'Send a test reminder in 5 seconds', nTestSent:'The reminder arrives in 5 seconds. Leave the app to see the notification.', nBadOff:'Enter a whole number greater than zero.',
+      nLecT:function(n,d){return d===null?n+' lecture starts now':n+' lecture in '+d;},
+      nExamT:function(n,t,d){return d===null?n+' '+t+' exam starts now':n+' '+t+' exam in '+d;},
+      nExamDayBefore:function(n,t){return 'Tomorrow: '+n+' '+t+' exam';}
     }
   };
+  function dur(min){var d=splitDur(min);return P.lang==='ar'?durAr(d.n,d.u):durEn(d.n,d.u);}
 
+  /* ================= state ================= */
   var app=document.getElementById('app'), layer=document.getElementById('layer'), toastBox=document.getElementById('toastBox'), splash=document.getElementById('splash');
-  var S={courses:[],sample:false}, fm=null, view='main', splashOn=true, themeSet=false;
-  var P={lang:'ar',theme:'auto'}, T=I18N.ar;
+  var S=null, P={lang:'ar',theme:'auto',t12:true,n:{lec:{on:true,offs:[30]},exam:{on:true,offs:[1440,60]}}}, T=I18N.ar;
+  var view='main', ret='main', splashOn=true, themeSet=false;
+  var fm=null, xf=null, W=null, O=null, NS={native:false,perm:'',exact:''};
 
+  function defCfg(){var st=[510,600,690,780,870,960,1050];return {days:[0,1,2,3,4,5],slots:st.map(function(s){return {s:s,e:s+90};})};}
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
+  function uid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+  /* ---- dates and times ---- */
+  function pad(n){return (n<10?'0':'')+n;}
+  function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+  function pd(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');return m?new Date(+m[1],+m[2]-1,+m[3]):null;}
+  function utc(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);return Date.UTC(+m[1],+m[2]-1,+m[3]);}
+  function addD(s,n){var d=pd(s);d.setDate(d.getDate()+n);return iso(d);}
+  function diffD(a,b){return Math.round((utc(b)-utc(a))/86400000);}
+  function absDay(s){return (pd(s).getDay()+1)%7;}
+  function fmtD(s){var d=pd(s);return d?pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear():'';}
+  function fmtDM(s){var d=pd(s);return d?pad(d.getDate())+'/'+pad(d.getMonth()+1):'';}
+  function todayS(){return iso(new Date());}
+  function hm(str){var m=/^(\d{1,2}):(\d{2})/.exec(str||'');return m?(+m[1])*60+(+m[2]):null;}
+  function toHM(min){return pad(Math.floor(min/60))+':'+pad(min%60);}
+  function fmtT(min){
+    if(!P.t12) return toHM(min);
+    var h=Math.floor(min/60)%24, m=min%60, h12=h%12||12;
+    return h12+':'+pad(m)+' '+(h<12?T.am:T.pm);
+  }
+  function dayName(i){return T.days[i];}
+
+  /* ---- names ---- */
+  function normN(s){
+    return String(s||'').toLowerCase().replace(/[\u064B-\u065F\u0670]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ').trim();
+  }
+  function normC(s){return String(s||'').toUpperCase().replace(/[\s\-_.]/g,'');}
+  function sameCourse(a,b){
+    if(a.code&&b.code&&normC(a.code)===normC(b.code)) return true;
+    var na=normN(a.name), nb=normN(b.name);
+    return !!na&&na===nb;
+  }
+  function courseFor(name,code){
+    var key={name:name,code:code};
+    for(var i=0;i<S.courses.length;i++) if(sameCourse(S.courses[i],key)) return S.courses[i];
+    return null;
+  }
+  function hashColor(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h%8;}
+  function nextColor(){
+    var cnt=[0,0,0,0,0,0,0,0];
+    S.courses.forEach(function(c){cnt[c.color]++;});
+    var best=0;for(var i=1;i<8;i++)if(cnt[i]<cnt[best])best=i;return best;
+  }
+  function colorOf(name,code){var c=courseFor(name,code);return c?c.color:hashColor(normN(name)||normC(code));}
+
+  /* ================= storage ================= */
+  function normalizeS(o){
+    var s={cfg:(o.cfg&&Array.isArray(o.cfg.days)&&Array.isArray(o.cfg.slots)&&o.cfg.slots.length)?o.cfg:defCfg(),
+      courses:o.courses||[],exams:o.exams||[],period:o.period||{from:'',to:''},sample:!!o.sample};
+    s.courses.forEach(function(c){c.code=c.code||'';c.mid=c.mid||'';c.fin=c.fin||'';(c.lec||[]).forEach(function(l){l.room=l.room||'';});});
+    return s;
+  }
+  function sampleState(){
+    var t=todayS();
+    return {cfg:defCfg(),sample:true,period:{from:'',to:''},
+      courses:[
+        {id:'s1',name:'الرياضيات',code:'MATH101',mid:'',fin:'',color:0,lec:[{d:0,s:0,e:0,room:'قاعة 3'},{d:2,s:0,e:0,room:'قاعة 3'}]},
+        {id:'s2',name:'الفيزياء',code:'PHYS102',mid:'',fin:'',color:1,lec:[{d:0,s:1,e:1,room:'قاعة 5'},{d:3,s:2,e:2,room:'معمل 1'}]},
+        {id:'s3',name:'البرمجة',code:'CS110',mid:'',fin:'',color:2,lec:[{d:1,s:1,e:2,room:'مختبر 2'},{d:4,s:0,e:0,room:'مختبر 2'}]},
+        {id:'s4',name:'اللغة الإنجليزية',code:'ENG100',mid:'',fin:'',color:3,lec:[{d:2,s:3,e:3,room:''},{d:5,s:1,e:1,room:''}]},
+        {id:'s5',name:'الإحصاء',code:'STAT201',mid:'',fin:'',color:4,lec:[{d:3,s:4,e:4,room:'قاعة 8'}]}
+      ],
+      exams:[
+        {id:'sx1',sample:true,name:'الرياضيات',code:'MATH101',type:'mid',date:addD(t,9),s:600,e:690,room:'قاعة 3'},
+        {id:'sx2',sample:true,name:'الفيزياء',code:'PHYS102',type:'mid',date:addD(t,10),s:540,e:630,room:'قاعة 5'},
+        {id:'sx3',sample:true,name:'البرمجة',code:'CS110',type:'mid',date:addD(t,12),s:720,e:840,room:'مختبر 2'}
+      ]};
+  }
+  function load(){
+    var tryKeys=[KEY,KEY1];
+    for(var i=0;i<tryKeys.length;i++){
+      try{var r=localStorage.getItem(tryKeys[i]);if(r){var o=JSON.parse(r);if(o&&Array.isArray(o.courses)){S=normalizeS(o);return;}}}catch(e){}
+    }
+    S=sampleState();
+  }
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
   function loadPrefs(){
-    try{var r=localStorage.getItem(PKEY); if(r){var o=JSON.parse(r); if(o&&I18N[o.lang]) P.lang=o.lang; if(o&&(o.theme==='auto'||o.theme==='light'||o.theme==='dark')) P.theme=o.theme;}}catch(e){}
+    var keys=[PKEY,PKEY1];
+    for(var i=0;i<keys.length;i++){
+      try{
+        var r=localStorage.getItem(keys[i]);if(!r)continue;var o=JSON.parse(r);if(!o)continue;
+        if(I18N[o.lang])P.lang=o.lang;
+        if(o.theme==='auto'||o.theme==='light'||o.theme==='dark')P.theme=o.theme;
+        if(typeof o.t12==='boolean')P.t12=o.t12;
+        if(o.n&&o.n.lec&&o.n.exam){P.n=o.n;}
+        return;
+      }catch(e){}
+    }
   }
   function savePrefs(){try{localStorage.setItem(PKEY,JSON.stringify(P));}catch(e){}}
   function applyPrefs(){
-    var h=document.documentElement;
-    T=I18N[P.lang];
-    h.setAttribute('lang',P.lang); h.setAttribute('dir',P.lang==='ar'?'rtl':'ltr');
-    if(P.theme==='auto'){ if(themeSet){h.removeAttribute('data-theme');themeSet=false;} }
+    var h=document.documentElement;T=I18N[P.lang];
+    h.setAttribute('lang',P.lang);h.setAttribute('dir',P.lang==='ar'?'rtl':'ltr');
+    if(P.theme==='auto'){if(themeSet){h.removeAttribute('data-theme');themeSet=false;}}
     else{h.setAttribute('data-theme',P.theme);themeSet=true;}
     document.title=T.title;
   }
+  function changed(){save();scheduleNotifs();}
 
+  /* ================= conflicts and duplicates ================= */
+  function ov(a,b){return a.d===b.d&&!(a.e<b.s||b.e<a.s);}
+  function lecRange(l){return dayName(l.d)+(P.lang==='ar'?' ':', ')+T.span(fmtT(S.cfg.slots[l.s].s),fmtT(S.cfg.slots[l.e].e));}
+  function findLecConflict(lecs,ignoreId){
+    for(var i=0;i<lecs.length;i++){
+      for(var j=i+1;j<lecs.length;j++)if(ov(lecs[i],lecs[j]))return {a:lecs[i],b:lecs[j],self:true};
+      for(var k=0;k<S.courses.length;k++){
+        var c=S.courses[k];if(c.id===ignoreId)continue;
+        for(var m=0;m<c.lec.length;m++)if(ov(lecs[i],c.lec[m]))return {a:lecs[i],b:c.lec[m],course:c};
+      }
+    }
+    return null;
+  }
+  function dupCourse(cand,ignoreId){
+    for(var i=0;i<S.courses.length;i++){var c=S.courses[i];if(c.id!==ignoreId&&sameCourse(c,cand))return c;}
+    return null;
+  }
+  function typeLbl(t){return t==='fin'?T.xFin:T.xMid;}
+  function dupExam(cand,extra){
+    var all=S.exams.filter(function(e){return e.id!==cand.id;}).concat(extra||[]);
+    for(var i=0;i<all.length;i++)if(all[i].type===cand.type&&sameCourse(all[i],cand))return all[i];
+    return null;
+  }
+  function examConflict(cand,extra){
+    var all=S.exams.filter(function(e){return e.id!==cand.id;}).concat(extra||[]);
+    for(var i=0;i<all.length;i++){var e=all[i];
+      if(e.date===cand.date&&e.s!=null&&cand.s<e.e&&e.s<cand.e)return e;}
+    return null;
+  }
+  function validateExam(c,extra){
+    if(!c.name)return T.errXName;
+    if(!c.date)return T.errXDate;
+    if(c.s==null||c.e==null)return T.errXTime;
+    if(c.e<=c.s)return T.errXOrder;
+    var d=dupExam(c,extra);if(d)return T.errDupExam(c.name,typeLbl(c.type));
+    var cf=examConflict(c,extra);if(cf)return T.errXConflict(cf.name,fmtT(cf.s)+' – '+fmtT(cf.e));
+    return '';
+  }
+
+  /* ================= exam list ================= */
+  function allExams(){
+    var list=S.exams.map(function(e){return Object.assign({},e,{manual:true});});
+    S.courses.forEach(function(c){
+      ['mid','fin'].forEach(function(k){
+        if(!c[k])return;
+        var has=S.exams.some(function(e){return e.type===k&&sameCourse(e,c);});
+        if(!has)list.push({id:'d:'+c.id+':'+k,name:c.name,code:c.code,type:k,date:c[k],s:null,e:null,room:'',derived:true,cid:c.id});
+      });
+    });
+    list.sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:((a.s==null?9999:a.s)-(b.s==null?9999:b.s));});
+    return list;
+  }
+  function findExam(id){
+    var l=allExams();for(var i=0;i<l.length;i++)if(l[i].id===id)return l[i];return null;
+  }
+  function purgeSampleExams(){S.exams=S.exams.filter(function(e){return !e.sample;});}
+  function clearSample(){if(S.sample){S.courses=[];S.sample=false;}purgeSampleExams();}
+
+  /* ================= native (notifications) ================= */
+  function cap(){return window.Capacitor||null;}
+  function plugin(name){
+    var c=cap();if(!c)return null;
+    try{if(c.isNativePlatform&&!c.isNativePlatform())return null;}catch(e){return null;}
+    try{return (c.Plugins&&c.Plugins[name])||(c.registerPlugin&&c.registerPlugin(name))||null;}catch(e){return null;}
+  }
+  function LN(){return plugin('LocalNotifications');}
+  var schedTimer=null;
+  function scheduleNotifs(){clearTimeout(schedTimer);schedTimer=setTimeout(doSchedule,400);}
+  function wdOf(absd){return ((absd+6)%7)+1;} /* Sat=0 -> Capacitor weekday 7 (Sat); Sun=1 -> 1 */
+  async function doSchedule(){
+    var L=LN();if(!L||!NS.native||NS.perm==='denied')return;
+    try{
+      var pend=await L.getPending();
+      if(pend&&pend.notifications&&pend.notifications.length)await L.cancel({notifications:pend.notifications.map(function(n){return {id:n.id};})});
+      var list=[],id=1,common={channelId:'reminders',smallIcon:'ic_stat_schedule',iconColor:'#0E7C70'};
+      if(P.n.lec.on&&!S.sample){
+        S.courses.forEach(function(c){
+          c.lec.forEach(function(l){
+            var sl=S.cfg.slots[l.s],el=S.cfg.slots[l.e];if(!sl||!el)return;
+            P.n.lec.offs.forEach(function(off){
+              var t=sl.s-off,shift=Math.floor(t/1440),mm=((t%1440)+1440)%1440;
+              var absd=((l.d+shift)%7+7)%7;
+              list.push(Object.assign({id:id++,title:T.nLecT(c.name,off===0?null:dur(off)),
+                body:fmtT(sl.s)+' – '+fmtT(el.e)+(l.room?' · '+T.roomLbl(l.room):''),
+                schedule:{on:{weekday:wdOf(absd),hour:Math.floor(mm/60),minute:mm%60},allowWhileIdle:true}},common));
+            });
+          });
+        });
+      }
+      if(P.n.exam.on){
+        var now=Date.now();
+        allExams().forEach(function(x){
+          if(x.sample)return;
+          var d=pd(x.date);if(!d)return;
+          if(x.s==null){
+            var at=new Date(d.getFullYear(),d.getMonth(),d.getDate()-1,20,0,0);
+            if(at.getTime()>now)list.push(Object.assign({id:id++,title:T.nExamDayBefore(x.name,typeLbl(x.type)),body:fmtD(x.date),schedule:{at:at,allowWhileIdle:true}},common));
+          }else{
+            P.n.exam.offs.forEach(function(off){
+              var at=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,x.s-off,0);
+              if(at.getTime()<=now)return;
+              list.push(Object.assign({id:id++,title:T.nExamT(x.name,typeLbl(x.type),off===0?null:dur(off)),
+                body:fmtD(x.date)+' · '+fmtT(x.s)+' – '+fmtT(x.e)+(x.room?' · '+T.roomLbl(x.room):''),schedule:{at:at,allowWhileIdle:true}},common));
+            });
+          }
+        });
+      }
+      list=list.slice(0,450);
+      if(list.length)await L.schedule({notifications:list});
+    }catch(e){}
+  }
+  async function initNative(){
+    var L=LN();if(!L)return;NS.native=true;
+    try{
+      var p=await L.checkPermissions();
+      if(p.display==='prompt'||p.display==='prompt-with-rationale')p=await L.requestPermissions();
+      NS.perm=p.display;
+      await L.createChannel({id:'reminders',name:'Reminders',description:'Lecture and exam reminders',importance:5,visibility:1,vibration:true,lights:true});
+      try{var x=await L.checkExactNotificationSetting();NS.exact=x.exact_alarm;}catch(e){}
+    }catch(e){}
+    scheduleNotifs();
+    if(view==='notif')render();
+  }
+  async function askPerm(){
+    var L=LN();if(!L)return;
+    try{var p=await L.requestPermissions();NS.perm=p.display;}catch(e){}
+    scheduleNotifs();render();
+  }
+  async function openExact(){
+    var L=LN();if(!L)return;
+    try{var x=await L.changeExactNotificationSetting();NS.exact=x.exact_alarm;}catch(e){}
+    scheduleNotifs();render();
+  }
+  async function testNotif(){
+    var L=LN();
+    if(!L){toast(T.nOnlyApp);return;}
+    try{
+      if(NS.perm!=='granted'){var p=await L.requestPermissions();NS.perm=p.display;}
+      await L.schedule({notifications:[{id:2147000000,title:T.title,body:'✓',channelId:'reminders',smallIcon:'ic_stat_schedule',iconColor:'#0E7C70',schedule:{at:new Date(Date.now()+5000),allowWhileIdle:true}}]});
+      toast(T.nTestSent);
+    }catch(e){toast(T.nPermNo);}
+  }
+
+  /* ================= logo / chrome ================= */
   function logo(cls){
     return '<svg class="'+cls+'" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="23" fill="#0E7C70"/>'+
       '<g fill="#fff" opacity=".9"><circle cx="20" cy="23" r="2.6"/><circle cx="30" cy="23" r="2.6"/><circle cx="40" cy="23" r="2.6"/><circle cx="50" cy="23" r="2.6"/><circle cx="60" cy="23" r="2.6"/><circle cx="70" cy="23" r="2.6"/><circle cx="80" cy="23" r="2.6"/></g>'+
@@ -242,236 +646,645 @@ form>label:not(:first-child){margin-top:10px}
       '<rect x="27" y="51" width="26" height="10" rx="5" fill="#F7D4DA"/><rect x="59" y="51" width="24" height="10" rx="5" fill="#D3E1FA"/>'+
       '<rect x="17" y="66" width="22" height="10" rx="5" fill="#D3E1FA"/><rect x="45" y="66" width="38" height="10" rx="5" fill="#CDEBE6"/></svg>';
   }
-  function renderSplash(){
-    document.getElementById('spLogo').innerHTML=logo('sp-logo');
-    document.getElementById('spT').textContent=T.title;
-    document.getElementById('spW').textContent=T.welcome;
-    document.getElementById('spS').textContent=T.welcomeSub;
+  var IC={
+    menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+    cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+    exam:'<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M10 13l2 2 4-4"/>',
+    plus:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/>',
+    bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/>',
+    gear:'<path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/>',
+    x:'<path d="M6 6l12 12M18 6L6 18"/>',
+    back:'<path d="M9 6l6 6-6 6"/>'
+  };
+  function svg(n){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>';}
+  function topMain(title,sub){
+    return '<header class="top"><button class="iconbtn" data-act="drawer" aria-label="'+T.menu+'">'+svg('menu')+'</button>'+logo('logo')+
+      '<div class="grow"><h1>'+title+'</h1>'+(sub?'<p class="sub">'+sub+'</p>':'')+'</div></header>';
   }
-
-  function sampleData(){
-    return [
-      {id:'s1',name:'الرياضيات',color:0,lec:[{d:0,s:0,e:0},{d:2,s:0,e:0}]},
-      {id:'s2',name:'الفيزياء',color:1,lec:[{d:0,s:1,e:1},{d:3,s:2,e:2}]},
-      {id:'s3',name:'البرمجة',color:2,lec:[{d:1,s:1,e:2},{d:4,s:0,e:0}]},
-      {id:'s4',name:'اللغة الإنجليزية',color:3,lec:[{d:2,s:3,e:3},{d:5,s:1,e:1}]},
-      {id:'s5',name:'الإحصاء',color:4,lec:[{d:3,s:4,e:4}]}
-    ];
-  }
-  function load(){
-    try{
-      var r=localStorage.getItem(KEY);
-      if(r){var o=JSON.parse(r); if(o&&Array.isArray(o.courses)){S=o;return;}}
-    }catch(e){}
-    S={courses:sampleData(),sample:true};
-  }
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
-  function esc(s){return String(s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
-  function find(id){for(var i=0;i<S.courses.length;i++)if(S.courses[i].id===id)return S.courses[i];return null;}
-  function range(l){return T.days[l.d]+(P.lang==='ar'?' ':', ')+T.span(l.s,l.e);}
-  function nextColor(){
-    var cnt=[0,0,0,0,0,0,0,0];
-    S.courses.forEach(function(c){cnt[c.color]++;});
-    var best=0; for(var i=1;i<8;i++)if(cnt[i]<cnt[best])best=i;
-    return best;
-  }
-  function ov(a,b){return a.d===b.d && !(a.e<b.s || b.e<a.s);}
-  function findConflict(lecs,ignoreId){
-    for(var i=0;i<lecs.length;i++){
-      for(var j=i+1;j<lecs.length;j++) if(ov(lecs[i],lecs[j])) return {a:lecs[i],b:lecs[j],self:true};
-      for(var k=0;k<S.courses.length;k++){
-        var c=S.courses[k]; if(c.id===ignoreId) continue;
-        for(var m=0;m<c.lec.length;m++) if(ov(lecs[i],c.lec[m])) return {a:lecs[i],b:c.lec[m],course:c};
-      }
-    }
-    return null;
+  function topBack(title){
+    return '<header class="top"><button class="back" data-act="goback" aria-label="'+T.back+'">'+svg('back')+T.back+'</button><h1>'+title+'</h1></header>';
   }
   function toast(t){
     toastBox.innerHTML='<div class="toast" role="status">'+esc(t)+'</div>';
-    setTimeout(function(){toastBox.innerHTML='';},2400);
+    clearTimeout(toast._t);toast._t=setTimeout(function(){toastBox.innerHTML='';},2600);
+  }
+  function closeLayer(){layer.innerHTML='';}
+
+  function drawer(){
+    var items=[['main','cal',T.mSchedule],['exams','exam',T.mExams],['wizard','plus',T.mNew],['notif','bell',T.mNotif],['settings','gear',T.mSettings]];
+    layer.innerHTML='<div class="dov" data-act="dclose"><nav class="drawer" id="drw" aria-label="'+T.menu+'">'+
+      '<div class="dr-h">'+logo('logo')+'<b>'+T.title+'</b></div>'+
+      items.map(function(it,i){
+        return (i===2?'<div class="dr-sep"></div>':'')+'<button class="dr-item" data-act="nav" data-v="'+it[0]+'"'+(it[0]===view?' aria-current="page"':'')+'>'+svg(it[1])+'<span>'+it[2]+'</span></button>';
+      }).join('')+'</nav></div>';
+    requestAnimationFrame(function(){requestAnimationFrame(function(){var d=$('drw');if(d)d.classList.add('open');});});
+  }
+  function sheetWrap(html,label,role){
+    layer.innerHTML='<div class="ov" data-act="ovclose"><div class="sheet" role="'+(role||'dialog')+'" aria-label="'+esc(label||'')+'">'+html+'</div></div>';
   }
 
-  /* ---------- main view ---------- */
-  function main(){layer.innerHTML='';renderMain();}
-  function renderMain(){
-    view='main'; fm=null;
-    var today=(new Date().getDay()+1)%7;
+  /* ================= main schedule ================= */
+  function gridHtml(){
+    var days=S.cfg.days.slice().sort(function(a,b){return a-b;}),slots=S.cfg.slots,n=slots.length,today=(new Date().getDay()+1)%7;
     var g='<div class="corner" style="grid-row:1;grid-column:1"></div>';
-    STARTS.forEach(function(t,i){g+='<div class="th" style="grid-row:1;grid-column:'+(i+2)+'"><b>'+t+'</b><span>'+ENDS[i]+'</span></div>';});
-    T.short.forEach(function(n,d){g+='<div class="dh'+(d===today?' tod':'')+'" style="grid-row:'+(d+2)+';grid-column:1">'+n+'</div>';});
-    for(var d=0;d<6;d++)for(var s=0;s<7;s++)g+='<div class="cell'+(d===today?' tod':'')+'" style="grid-row:'+(d+2)+';grid-column:'+(s+2)+'"></div>';
+    slots.forEach(function(sl,i){g+='<div class="th" style="grid-row:1;grid-column:'+(i+2)+'"><b>'+fmtT(sl.s)+'</b><span>'+fmtT(sl.e)+'</span></div>';});
+    days.forEach(function(d,r){
+      g+='<div class="dh'+(d===today?' tod':'')+'" style="grid-row:'+(r+2)+';grid-column:1">'+dayName(d)+'</div>';
+      for(var s=0;s<n;s++)g+='<div class="cell'+(d===today?' tod':'')+'" style="grid-row:'+(r+2)+';grid-column:'+(s+2)+'"></div>';
+    });
     S.courses.forEach(function(c){
       c.lec.forEach(function(l){
-        g+='<button class="block c'+c.color+'" data-act="sheet" data-id="'+c.id+'" style="grid-row:'+(l.d+2)+';grid-column:'+(l.s+2)+' / span '+(l.e-l.s+1)+'">'+esc(c.name)+'</button>';
+        var r=days.indexOf(l.d);if(r<0||!slots[l.s]||!slots[l.e])return;
+        g+='<button class="block c'+c.color+'" data-act="sheet" data-id="'+c.id+'" style="grid-row:'+(r+2)+';grid-column:'+(l.s+2)+' / span '+(l.e-l.s+1)+'">'+esc(c.name)+(l.room?'<small>'+esc(l.room)+'</small>':'')+'</button>';
       });
     });
+    return '<div class="grid" style="grid-template-columns:3.4rem repeat('+n+',minmax(4.8rem,1fr));grid-template-rows:3rem repeat('+days.length+',minmax(3.9rem,auto));min-width:'+(3.4+n*4.8)+'rem">'+g+'</div>';
+  }
+  function renderMain(){
     var list=S.courses.map(function(c){
       return '<button class="crs" data-act="sheet" data-id="'+c.id+'"><span class="dot c'+c.color+'"></span><span class="crs-n">'+esc(c.name)+'</span><span class="crs-m">'+c.lec.length+' '+T.lecWord(c.lec.length)+'</span></button>';
     }).join('');
-    app.innerHTML=
-      '<header class="top">'+logo('logo')+'<div class="grow"><h1>'+T.title+'</h1><p class="sub">'+T.sub+'</p></div>'+
-        '<button class="iconbtn" data-act="settings" aria-label="'+T.settings+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></svg></button></header>'+
+    app.innerHTML=topMain(T.title,T.sub)+
       (S.sample?'<div class="note">'+T.sample+'</div>':'')+
       '<div class="acts"><button class="btn primary" data-act="new">'+T.newSched+'</button><button class="btn" data-act="add">'+T.addCourse+'</button></div>'+
-      '<div class="gridbox"><div class="scroll"><div class="grid">'+g+'</div></div>'+(S.courses.length?'':'<p class="empty">'+T.empty+'</p>')+'</div>'+
-      '<p class="hint">'+T.hint+'</p>'+
+      '<div class="gridbox"><div class="scroll">'+gridHtml()+'</div>'+(S.courses.length?'':'<p class="empty">'+T.empty+'</p>')+'</div>'+
+      (S.cfg.slots.length>3?'<p class="hint">'+T.hint+'</p>':'')+
       (S.courses.length?'<section class="sec"><h3>'+T.courses+' ('+S.courses.length+')</h3>'+list+'</section>':'');
   }
-
-  /* ---------- sheets ---------- */
-  function sheet(id){
-    var c=find(id); if(!c) return;
+  function courseSheet(id){
+    var c=S.courses.filter(function(x){return x.id===id;})[0];if(!c)return;
     var ls=c.lec.slice().sort(function(a,b){return a.d-b.d||a.s-b.s;});
-    layer.innerHTML='<div class="ov" data-act="ovclose"><div class="sheet" role="dialog" aria-label="'+esc(c.name)+'">'+
-      '<div class="sh-h"><span class="dot c'+c.color+'"></span><h2>'+esc(c.name)+'</h2></div>'+
-      '<ul class="lecs">'+ls.map(function(l){return '<li><span>'+T.days[l.d]+'</span><span>'+T.span(l.s,l.e)+'</span></li>';}).join('')+'</ul>'+
+    var info=[];
+    if(c.code)info.push('<li><span>'+T.code+'</span><span>'+esc(c.code)+'</span></li>');
+    if(c.mid)info.push('<li><span>'+T.midDate+'</span><span>'+fmtD(c.mid)+'</span></li>');
+    if(c.fin)info.push('<li><span>'+T.finDate+'</span><span>'+fmtD(c.fin)+'</span></li>');
+    sheetWrap('<div class="sh-h"><span class="dot c'+c.color+'"></span><h2>'+esc(c.name)+'</h2></div>'+
+      (info.length?'<ul class="kv">'+info.join('')+'</ul>':'')+
+      '<ul class="kv">'+ls.map(function(l){
+        var sl=S.cfg.slots[l.s],el=S.cfg.slots[l.e];
+        return '<li><span>'+dayName(l.d)+(l.room?' · '+esc(l.room):'')+'</span><span>'+(sl&&el?T.span(fmtT(sl.s),fmtT(el.e)):'')+'</span></li>';
+      }).join('')+'</ul>'+
       '<div class="row"><button class="btn" data-act="edit" data-id="'+c.id+'">'+T.edit+'</button><button class="btn danger" data-act="askdel" data-id="'+c.id+'">'+T.del+'</button></div>'+
-      '<button class="btn ghost" data-act="close">'+T.close+'</button></div></div>';
+      '<button class="btn ghost" data-act="close">'+T.close+'</button>',c.name);
   }
   function askDelete(id){
-    var c=find(id); if(!c) return;
-    layer.innerHTML='<div class="ov" data-act="ovclose"><div class="sheet" role="alertdialog" aria-label="'+T.del+'">'+
-      '<p>'+esc(T.delQ(c.name,c.lec.length))+'</p>'+
-      '<div class="row"><button class="btn danger" data-act="del" data-id="'+c.id+'">'+T.delFinal+'</button><button class="btn" data-act="sheet" data-id="'+c.id+'">'+T.cancel+'</button></div></div></div>';
+    var c=S.courses.filter(function(x){return x.id===id;})[0];if(!c)return;
+    sheetWrap('<p>'+esc(T.delQ(c.name,c.lec.length))+'</p><div class="row"><button class="btn danger" data-act="del" data-id="'+c.id+'">'+T.delFinal+'</button><button class="btn" data-act="sheet" data-id="'+c.id+'">'+T.cancel+'</button></div>',T.del,'alertdialog');
   }
-  function askNew(){
-    layer.innerHTML='<div class="ov" data-act="ovclose"><div class="sheet" role="alertdialog" aria-label="'+T.newSched+'">'+
-      '<p>'+esc(T.newQ(S.courses.length))+'</p>'+
-      '<div class="row"><button class="btn danger" data-act="startnew">'+T.newSched+'</button><button class="btn" data-act="close">'+T.cancel+'</button></div></div></div>';
-  }
-  function settingsSheet(){
-    function seg(act,cur,items){
-      return '<div class="seg">'+items.map(function(it){return '<button data-act="'+act+'" data-v="'+it[0]+'" aria-pressed="'+(cur===it[0])+'">'+it[1]+'</button>';}).join('')+'</div>';
-    }
-    layer.innerHTML='<div class="ov" data-act="ovclose"><div class="sheet" role="dialog" aria-label="'+T.settings+'">'+
-      '<h2>'+T.settings+'</h2>'+
-      '<div class="lab">'+T.language+'</div>'+seg('lang',P.lang,[['ar','العربية'],['en','English']])+
-      '<div class="lab">'+T.theme+'</div>'+seg('theme',P.theme,[['auto',T.auto],['light',T.light],['dark',T.dark]])+
-      '<button class="btn ghost" data-act="close">'+T.close+'</button></div></div>';
-  }
-  function startNew(){S={courses:[],sample:false};save();layer.innerHTML='';openForm('new');}
 
-  /* ---------- form view ---------- */
+  /* ================= course form ================= */
   var nameEl,countEl,lecsEl,errEl;
-  function opts(arr,ph){var h='<option value="">'+ph+'</option>';arr.forEach(function(t,i){h+='<option value="'+i+'">'+t+'</option>';});return h;}
-  function rowHtml(i){
+  function dayOpts(){var h='<option value="">'+T.pick+'</option>';S.cfg.days.slice().sort(function(a,b){return a-b;}).forEach(function(d){h+='<option value="'+d+'">'+dayName(d)+'</option>';});return h;}
+  function slotOpts(k){var h='<option value="">'+T.pick+'</option>';S.cfg.slots.forEach(function(sl,i){h+='<option value="'+i+'">'+fmtT(k==='s'?sl.s:sl.e)+'</option>';});return h;}
+  function lecRowHtml(i){
     return '<div class="lec"><div class="lec-t">'+T.lecN(i+1)+'</div><div class="lec-f">'+
-      '<label>'+T.day+'<select class="d" aria-label="'+T.lecN(i+1)+' - '+T.day+'">'+opts(T.days,T.pick)+'</select></label>'+
-      '<label>'+T.from+'<select class="s" aria-label="'+T.lecN(i+1)+' - '+T.from+'">'+opts(STARTS,T.pick)+'</select></label>'+
-      '<label>'+T.to+'<select class="e" aria-label="'+T.lecN(i+1)+' - '+T.to+'"></select></label></div></div>';
+      '<label>'+T.day+'<select class="d" aria-label="'+T.lecN(i+1)+' - '+T.day+'">'+dayOpts()+'</select></label>'+
+      '<label>'+T.from+'<select class="s" aria-label="'+T.lecN(i+1)+' - '+T.from+'">'+slotOpts('s')+'</select></label>'+
+      '<label>'+T.to+'<select class="e" aria-label="'+T.lecN(i+1)+' - '+T.to+'"></select></label></div>'+
+      '<div class="lec-r"><label>'+T.room+' <span class="opt">'+T.optional+'</span><input class="rm" type="text" autocomplete="off" placeholder="'+T.roomPh+'" aria-label="'+T.lecN(i+1)+' - '+T.room+'"></label></div></div>';
   }
   function fillE(row,s,e){
-    var sel=row.querySelector('.e'), h='<option value="">'+T.pick+'</option>';
-    for(var k=(s===''?0:+s);k<7;k++)h+='<option value="'+k+'">'+ENDS[k]+'</option>';
-    sel.innerHTML=h; sel.value=e;
+    var sel=row.querySelector('.e'),h='<option value="">'+T.pick+'</option>';
+    for(var k=(s===''?0:+s);k<S.cfg.slots.length;k++)h+='<option value="'+k+'">'+fmtT(S.cfg.slots[k].e)+'</option>';
+    sel.innerHTML=h;sel.value=e;
   }
   function rawLecs(){
-    return [].map.call(lecsEl.querySelectorAll('.lec'),function(r){
-      return {d:r.querySelector('.d').value,s:r.querySelector('.s').value,e:r.querySelector('.e').value};
-    });
+    return [].map.call(lecsEl.querySelectorAll('.lec'),function(r){return {d:r.querySelector('.d').value,s:r.querySelector('.s').value,e:r.querySelector('.e').value,room:r.querySelector('.rm').value};});
   }
   function buildRows(pre){
-    var n=+countEl.value||0, cur=pre||rawLecs(), h='';
-    for(var i=0;i<n;i++)h+=rowHtml(i);
+    var n=+countEl.value||0,cur=pre||rawLecs(),h='';
+    for(var i=0;i<n;i++)h+=lecRowHtml(i);
     lecsEl.innerHTML=h;
     [].forEach.call(lecsEl.querySelectorAll('.lec'),function(r,i){
-      var v=cur[i]||{d:'',s:'',e:''};
-      r.querySelector('.d').value=v.d; r.querySelector('.s').value=v.s; fillE(r,v.s,v.e);
+      var v=cur[i]||{d:'',s:'',e:'',room:''};
+      r.querySelector('.d').value=v.d;r.querySelector('.s').value=v.s;fillE(r,v.s,v.e);r.querySelector('.rm').value=v.room||'';
     });
   }
   function renderAdded(){
-    var el=document.getElementById('added'); if(!el) return;
+    var el=$('added');if(!el)return;
     el.innerHTML=S.courses.length?'<h3>'+T.inNow+' ('+S.courses.length+')</h3><ul class="chips">'+S.courses.map(function(c){return '<li class="chip c'+c.color+'">'+esc(c.name)+'</li>';}).join('')+'</ul>':'';
   }
   function showErr(t){errEl.textContent=t;errEl.hidden=false;errEl.scrollIntoView({block:'center'});}
   function openForm(mode,id){
-    layer.innerHTML='';
-    view='form'; fm={mode:mode,id:id||null};
-    var c=id?find(id):null;
-    var title=mode==='edit'?T.editTitle:mode==='new'?T.newSched:T.addCourse;
+    closeLayer();view='form';ret='main';fm={mode:mode,id:id||null};renderForm();window.scrollTo(0,0);
+  }
+  function renderForm(){
+    var c=fm.id?S.courses.filter(function(x){return x.id===fm.id;})[0]:null;
+    var title=fm.mode==='edit'?T.editTitle:T.addCourse;
     var cnt='<option value="">'+T.pickCount+'</option>';for(var i=1;i<=6;i++)cnt+='<option value="'+i+'">'+i+'</option>';
-    app.innerHTML=
-      '<header class="top"><button class="back" data-act="'+(mode==='edit'?'back':'done')+'" aria-label="'+T.back+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>'+T.back+'</button><h1>'+title+'</h1></header>'+
+    app.innerHTML=topBack(title)+
       '<form id="f" novalidate>'+
         '<label for="name">'+T.name+'</label><input id="name" type="text" autocomplete="off" placeholder="'+T.namePh+'">'+
+        '<label for="code">'+T.code+' <span class="opt">'+T.optional+'</span></label><input id="code" type="text" autocomplete="off" autocapitalize="characters" placeholder="'+T.codePh+'">'+
+        '<div class="two" style="margin-top:10px"><div><label for="mid">'+T.midDate+' <span class="opt">'+T.optional+'</span></label><input id="mid" type="date"></div>'+
+        '<div><label for="fin">'+T.finDate+' <span class="opt">'+T.optional+'</span></label><input id="fin" type="date"></div></div>'+
         '<label for="count">'+T.perWeek+'</label><select id="count">'+cnt+'</select>'+
         '<div id="lecs"></div>'+
         '<div id="err" class="err" role="alert" hidden></div>'+
-        '<button id="sub" type="submit" class="btn primary wide">'+(mode==='edit'?T.save:T.add)+'</button>'+
+        '<button id="sub" type="submit" class="btn primary wide">'+(fm.mode==='edit'?T.save:T.add)+'</button>'+
       '</form>'+
-      (mode!=='edit'?'<section class="sec" id="added"></section><div id="doneWrap"><button class="btn wide" data-act="done">'+T.view+'</button></div>':'');
-    nameEl=document.getElementById('name');countEl=document.getElementById('count');lecsEl=document.getElementById('lecs');errEl=document.getElementById('err');
-    if(c){nameEl.value=c.name;countEl.value=c.lec.length;buildRows(c.lec.map(function(l){return {d:l.d,s:l.s,e:l.e};}));}
+      (fm.mode!=='edit'?'<section class="sec" id="added"></section><div id="doneWrap"><button class="btn wide" data-act="done">'+T.view+'</button></div>':'');
+    nameEl=$('name');countEl=$('count');lecsEl=$('lecs');errEl=$('err');
+    if(c){nameEl.value=c.name;$('code').value=c.code||'';$('mid').value=c.mid||'';$('fin').value=c.fin||'';countEl.value=c.lec.length;
+      buildRows(c.lec.map(function(l){return {d:l.d,s:l.s,e:l.e,room:l.room};}));}
     renderAdded();
     countEl.addEventListener('change',function(){errEl.hidden=true;buildRows();});
-    nameEl.addEventListener('input',function(){errEl.hidden=true;});
+    $('f').addEventListener('input',function(){errEl.hidden=true;});
     lecsEl.addEventListener('change',function(ev){
       errEl.hidden=true;
       if(ev.target.classList.contains('s')){
-        var row=ev.target.closest('.lec'), s=ev.target.value, e=row.querySelector('.e').value;
-        if(s!==''&&(e===''||+e<+s)) e=s;
+        var row=ev.target.closest('.lec'),s=ev.target.value,e=row.querySelector('.e').value;
+        if(s!==''&&(e===''||+e<+s))e=s;
         fillE(row,s,e);
       }
     });
-    document.getElementById('f').addEventListener('submit',function(ev){ev.preventDefault();submit();});
-    window.scrollTo(0,0);
+    $('f').addEventListener('submit',function(ev){ev.preventDefault();submitCourse();});
   }
-  function submit(){
-    var name=nameEl.value.trim(), n=+countEl.value, raw=rawLecs();
-    if(!name) return showErr(T.errName);
-    if(!n) return showErr(T.errCount);
-    for(var i=0;i<raw.length;i++) if(raw[i].d===''||raw[i].s===''||raw[i].e==='') return showErr(T.errFill(i+1));
-    var lecs=raw.map(function(r){return {d:+r.d,s:+r.s,e:+r.e};});
-    var cf=findConflict(lecs,fm.id);
+  function submitCourse(){
+    var name=nameEl.value.trim(),code=$('code').value.trim(),mid=$('mid').value,fin=$('fin').value,n=+countEl.value,raw=rawLecs();
+    if(!name)return showErr(T.errName);
+    var dup=dupCourse({name:name,code:code},fm.id);if(dup)return showErr(T.errDupCourse(name));
+    if(mid&&fin&&fin<mid)return showErr(T.errMidFin);
+    if(!n)return showErr(T.errCount);
+    for(var i=0;i<raw.length;i++)if(raw[i].d===''||raw[i].s===''||raw[i].e==='')return showErr(T.errFill(i+1));
+    var lecs=raw.map(function(r){return {d:+r.d,s:+r.s,e:+r.e,room:r.room.trim()};});
+    var cf=findLecConflict(lecs,fm.id);
     if(cf){
-      if(cf.self) return showErr(T.conflictSelf(range(cf.a),range(cf.b)));
-      return showErr(T.conflict(range(cf.a),cf.course.name,range(cf.b)));
+      if(cf.self)return showErr(T.conflictSelf(lecRange(cf.a),lecRange(cf.b)));
+      return showErr(T.conflict(lecRange(cf.a),cf.course.name,lecRange(cf.b)));
     }
     if(fm.mode==='edit'){
-      var c=find(fm.id); c.name=name; c.lec=lecs; save(); toast(T.tEdit); main();
+      var c=S.courses.filter(function(x){return x.id===fm.id;})[0];
+      c.name=name;c.code=code;c.mid=mid;c.fin=fin;c.lec=lecs;changed();toast(T.tEdit);go('main');
     }else{
-      S.courses.push({id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:name,color:nextColor(),lec:lecs});
-      save(); toast(T.tAdd(name));
-      nameEl.value='';countEl.value='';lecsEl.innerHTML='';errEl.hidden=true;renderAdded();nameEl.focus();
+      S.courses.push({id:uid('c'),name:name,code:code,mid:mid,fin:fin,color:nextColor(),lec:lecs});
+      changed();toast(T.tAdd(name));
+      nameEl.value='';$('code').value='';$('mid').value='';$('fin').value='';countEl.value='';lecsEl.innerHTML='';errEl.hidden=true;renderAdded();nameEl.focus();
     }
   }
 
-  /* ---------- events ---------- */
+  /* ================= new schedule wizard ================= */
+  function openWizard(){
+    closeLayer();W={days:S.cfg.days.slice(),slots:S.cfg.slots.map(function(s){return {s:s.s,e:s.e};}),err:''};
+    view='wizard';ret='main';render();window.scrollTo(0,0);
+  }
+  function renderWizard(){
+    var days='';for(var d=0;d<7;d++)days+='<button type="button" class="dchip" data-act="wday" data-v="'+d+'" aria-pressed="'+(W.days.indexOf(d)>=0)+'">'+dayName(d)+'</button>';
+    var slots=W.slots.map(function(sl,i){
+      return '<div class="slot"><label>'+T.from+'<input type="time" data-w="s" data-i="'+i+'" value="'+(sl.s==null?'':toHM(sl.s))+'" aria-label="'+T.wSlotN(i+1)+' - '+T.from+'"></label>'+
+        '<label>'+T.to+'<input type="time" data-w="e" data-i="'+i+'" value="'+(sl.e==null?'':toHM(sl.e))+'" aria-label="'+T.wSlotN(i+1)+' - '+T.to+'"></label>'+
+        '<button type="button" class="iconbtn" data-act="wdel" data-i="'+i+'" aria-label="'+T.wDel+'">'+svg('x')+'</button></div>';
+    }).join('');
+    app.innerHTML=topBack(T.wTitle)+
+      '<div class="panel"><p>'+T.wIntro+'</p></div>'+
+      '<div class="panel"><h2>'+T.wDays+'</h2><div class="dchips">'+days+'</div></div>'+
+      '<div class="panel"><h2>'+T.wSlots+'</h2>'+slots+
+        '<div class="row"><button type="button" class="btn" data-act="wadd">'+T.wAddSlot+'</button><button type="button" class="btn ghost" data-act="wdef">'+T.wDefault+'</button></div></div>'+
+      '<div id="err" class="err" role="alert"'+(W.err?'':' hidden')+'>'+esc(W.err)+'</div>'+
+      '<button class="btn primary wide" data-act="wcreate" style="margin-top:14px">'+T.wCreate+'</button>';
+  }
+  function createSchedule(){
+    var days=W.days.slice().sort(function(a,b){return a-b;});
+    var slots=W.slots.map(function(s){return {s:s.s,e:s.e};});
+    function fail(m){W.err=m;renderWizard();var e=$('err');if(e)e.scrollIntoView({block:'center'});}
+    if(!days.length)return fail(T.errWDays);
+    if(!slots.length)return fail(T.errWSlots);
+    for(var i=0;i<slots.length;i++){if(slots[i].s==null||slots[i].e==null||slots[i].e<=slots[i].s)return fail(T.errWTime(i+1));}
+    slots.sort(function(a,b){return a.s-b.s;});
+    for(var j=1;j<slots.length;j++){if(slots[j].s<slots[j-1].e)return fail(T.errWOverlap(j,j+1));}
+    S.cfg={days:days,slots:slots};S.courses=[];S.sample=false;purgeSampleExams();
+    changed();toast(T.wCreate);openForm('new');
+  }
+
+  /* ================= exams view ================= */
+  function xBlock(x){
+    var col=colorOf(x.name,x.code);
+    var tm=x.s==null?T.xNoTime:fmtT(x.s)+' – '+fmtT(x.e);
+    return '<button class="xb c'+col+(x.derived?' dashed':'')+'" data-act="xsheet" data-id="'+esc(x.id)+'"><b>'+esc(x.name)+'<span class="tg">'+typeLbl(x.type)+'</span></b><span>'+tm+(x.room?' · '+esc(x.room):'')+'</span></button>';
+  }
+  function renderExams(){
+    var list=allExams(),per=S.period,ds=list.map(function(x){return x.date;});
+    if(per.from)ds.push(per.from);if(per.to)ds.push(per.to);ds.sort();
+    var t=todayS(),now=new Date(),nowMin=now.getHours()*60+now.getMinutes();
+    var up=list.filter(function(x){return x.date>t||(x.date===t&&(x.e==null||x.e>nowMin));})[0];
+    var banner='';
+    if(up){
+      var dd=diffD(t,up.date),rel=dd===0?T.xToday:dd===1?T.xTomorrow:T.xInDays(dd);
+      banner='<div class="next"><small>'+T.xNext+'</small><b>'+esc(up.name)+' · '+typeLbl(up.type)+'</b><span>'+rel+' · '+dayName(absDay(up.date))+' '+fmtD(up.date)+(up.s!=null?' · '+fmtT(up.s):'')+'</span></div>';
+    }
+    var body='';
+    if(ds.length){
+      var from=ds[0],to=ds[ds.length-1];
+      if(diffD(from,to)>400)to=addD(from,400);
+      var hasP=!!(per.from&&per.to),exDates={};
+      list.forEach(function(x){exDates[x.date]=true;});
+      var wkStart=addD(from,-absDay(from)),wn=1;
+      while(wkStart<=to&&wn<=40){
+        var days=[],wkEx=[];
+        for(var i=0;i<7;i++){var dd0=addD(wkStart,i);if(exDates[dd0])wkEx.push(dd0);}
+        for(var j=0;j<7;j++){
+          var dy=addD(wkStart,j),inP=hasP&&dy>=per.from&&dy<=per.to;
+          var inEx=wkEx.length&&!hasP&&dy>=wkEx[0]&&dy<=wkEx[wkEx.length-1];
+          if(inP||exDates[dy]||inEx)days.push({d:dy,i:j});
+        }
+        if(days.length){
+          var rows=days.map(function(o){
+            var xs=list.filter(function(x){return x.date===o.d;}),tod=o.d===t;
+            return '<div class="drow"><div class="dd'+(tod?' tod':'')+'"><b>'+dayName(o.i)+'</b><span>'+fmtDM(o.d)+'</span></div><div class="dx'+(tod?' tod':'')+(xs.length?'':' none')+'">'+xs.map(xBlock).join('')+'</div></div>';
+          }).join('');
+          body+='<section class="wk"><h3>'+T.xWeek(wn,fmtDM(days[0].d),fmtDM(days[days.length-1].d))+'</h3><div class="wkbox">'+rows+'</div></section>';
+          wn++;
+        }
+        wkStart=addD(wkStart,7);
+      }
+    }else body='<div class="panel"><p>'+T.xEmpty+'</p></div>';
+    app.innerHTML=topMain(T.xTitle,'')+
+      '<div class="acts"><button class="btn primary" data-act="xnew">'+T.xAdd+'</button><button class="btn" data-act="xphoto">'+T.xPhoto+'</button></div>'+
+      '<div class="period"><div><b>'+T.xPeriod+'</b><br><span>'+(per.from&&per.to?fmtD(per.from)+' – '+fmtD(per.to):T.xPeriodNone)+'</span></div><button class="btn sm" data-act="xperiod">'+T.xPeriodEdit+'</button></div>'+
+      banner+body;
+  }
+  function periodSheet(){
+    sheetWrap('<h2>'+T.xPeriod+'</h2><p class="sub">'+T.xPeriodHint+'</p>'+
+      '<div class="two"><div><label for="pf">'+T.xFrom+'</label><input id="pf" type="date" value="'+esc(S.period.from)+'"></div><div><label for="pt">'+T.xTo+'</label><input id="pt" type="date" value="'+esc(S.period.to)+'"></div></div>'+
+      '<div id="perr" class="err" role="alert" hidden></div>'+
+      '<div class="row"><button class="btn primary" data-act="psave">'+T.xSave+'</button><button class="btn" data-act="pclear">'+T.xClear+'</button></div>',T.xPeriod);
+  }
+  function examSheet(id){
+    var x=findExam(id);if(!x)return;
+    var rows='<li><span>'+T.xType+'</span><span>'+typeLbl(x.type)+'</span></li><li><span>'+T.xDate+'</span><span>'+dayName(absDay(x.date))+' '+fmtD(x.date)+'</span></li>'+
+      '<li><span>'+T.from+' / '+T.to+'</span><span>'+(x.s==null?T.xNoTime:fmtT(x.s)+' – '+fmtT(x.e))+'</span></li>'+(x.room?'<li><span>'+T.room+'</span><span>'+esc(x.room)+'</span></li>':'');
+    var btns=x.derived?
+      '<p class="sub">'+T.xDerivedNote+'</p><div class="row"><button class="btn primary" data-act="xfromd" data-id="'+esc(x.id)+'">'+T.xSetTime+'</button><button class="btn" data-act="xcourse" data-id="'+esc(x.cid)+'">'+T.xEditCourse+'</button></div>':
+      '<div class="row"><button class="btn" data-act="xedit" data-id="'+esc(x.id)+'">'+T.edit+'</button><button class="btn danger" data-act="xaskdel" data-id="'+esc(x.id)+'">'+T.del+'</button></div>';
+    sheetWrap('<div class="sh-h"><span class="dot c'+colorOf(x.name,x.code)+'"></span><h2>'+esc(x.name)+'</h2></div><ul class="kv">'+rows+'</ul>'+btns+'<button class="btn ghost" data-act="close">'+T.close+'</button>',x.name);
+  }
+
+  /* ---- exam form ---- */
+  function openXForm(mode,pre){
+    closeLayer();if(S.sample)purgeSampleExams();
+    xf={mode:mode,id:(pre&&pre.manualId)||null,pre:pre||{}};view='xform';ret='exams';render();window.scrollTo(0,0);
+  }
+  function renderXForm(){
+    var p=xf.pre||{},cl=S.courses.map(function(c){return '<option value="'+esc(c.name)+'"></option>';}).join('');
+    app.innerHTML=topBack(xf.mode==='edit'?T.xEditTitle:T.xAddTitle)+
+      '<form id="xfm" novalidate>'+
+        '<label for="xname">'+T.xCourse+'</label><input id="xname" type="text" list="clist" autocomplete="off" placeholder="'+T.xCoursePh+'" value="'+esc(p.name||'')+'"><datalist id="clist">'+cl+'</datalist>'+
+        '<label for="xcode">'+T.code+' <span class="opt">'+T.optional+'</span></label><input id="xcode" type="text" autocomplete="off" autocapitalize="characters" placeholder="'+T.codePh+'" value="'+esc(p.code||'')+'">'+
+        '<label for="xtype">'+T.xType+'</label><select id="xtype"><option value="mid"'+(p.type==='mid'?' selected':'')+'>'+T.xMid+'</option><option value="fin"'+(p.type==='fin'?' selected':'')+'>'+T.xFin+'</option></select>'+
+        '<label for="xdate">'+T.xDate+'</label><input id="xdate" type="date" value="'+esc(p.date||'')+'">'+
+        '<div class="two" style="margin-top:10px"><div><label for="xs">'+T.from+'</label><input id="xs" type="time" value="'+(p.s!=null?toHM(p.s):'')+'"></div><div><label for="xe">'+T.to+'</label><input id="xe" type="time" value="'+(p.e!=null?toHM(p.e):'')+'"></div></div>'+
+        '<label for="xroom" style="margin-top:10px">'+T.room+' <span class="opt">'+T.optional+'</span></label><input id="xroom" type="text" autocomplete="off" placeholder="'+T.roomPh+'" value="'+esc(p.room||'')+'">'+
+        '<div id="err" class="err" role="alert" hidden></div>'+
+        '<button id="sub" type="submit" class="btn primary wide">'+(xf.mode==='edit'?T.save:T.add)+'</button>'+
+      '</form>'+(xf.mode!=='edit'?'<div id="doneWrap"><button class="btn wide" data-act="goback">'+T.view+'</button></div>':'');
+    errEl=$('err');
+    $('xfm').addEventListener('input',function(){errEl.hidden=true;});
+    $('xname').addEventListener('change',function(){
+      var c=courseFor($('xname').value.trim(),'');if(c&&!$('xcode').value.trim())$('xcode').value=c.code||'';
+    });
+    $('xfm').addEventListener('submit',function(ev){ev.preventDefault();submitX();});
+  }
+  function submitX(){
+    var c={id:xf.id||uid('x'),name:$('xname').value.trim(),code:$('xcode').value.trim(),type:$('xtype').value,date:$('xdate').value,s:hm($('xs').value),e:hm($('xe').value),room:$('xroom').value.trim()};
+    var m=validateExam(c);if(m)return showErr(m);
+    if(xf.mode==='edit'){S.exams=S.exams.map(function(e){return e.id===c.id?c:e;});changed();toast(T.tXSaved);go('exams');}
+    else{S.exams.push(c);changed();toast(T.tXAdded(c.name));
+      $('xname').value='';$('xcode').value='';$('xs').value='';$('xe').value='';$('xroom').value='';errEl.hidden=true;$('xname').focus();}
+  }
+
+  /* ================= settings and notifications views ================= */
+  function renderSettings(){
+    function seg(act,cur,items){return '<div class="seg">'+items.map(function(it){return '<button data-act="'+act+'" data-v="'+it[0]+'" aria-pressed="'+(cur===it[0])+'">'+it[1]+'</button>';}).join('')+'</div>';}
+    app.innerHTML=topMain(T.settings,'')+
+      '<div class="panel"><h2>'+T.language+'</h2>'+seg('lang',P.lang,[['ar','العربية'],['en','English']])+'</div>'+
+      '<div class="panel"><h2>'+T.theme+'</h2>'+seg('theme',P.theme,[['auto',T.auto],['light',T.light],['dark',T.dark]])+'</div>'+
+      '<div class="panel"><h2>'+T.timeFmt+'</h2>'+seg('tfmt',P.t12?'12':'24',[['12',T.h12],['24',T.h24]])+'</div>';
+  }
+  function offChips(k){
+    var o=P.n[k].offs;
+    if(!o.length)return '<p>'+T.nNoOffs+'</p>';
+    return '<div class="chips">'+o.map(function(m,i){return '<span class="chip plain">'+T.nBefore(dur(m))+'<button data-act="offdel" data-k="'+k+'" data-i="'+i+'" aria-label="'+T.del+'">×</button></span>';}).join('')+'</div>';
+  }
+  function offPanel(k,title,hint){
+    return '<div class="panel"><div class="row-s"><h2>'+title+'</h2><button class="switch" role="switch" data-act="ntoggle" data-k="'+k+'" aria-checked="'+P.n[k].on+'" aria-label="'+title+'"></button></div><p>'+hint+'</p>'+
+      offChips(k)+
+      '<div class="add-off"><input id="offn-'+k+'" type="number" inputmode="numeric" min="1" placeholder="30" aria-label="'+T.nAddOff+'"><select id="offu-'+k+'" aria-label="'+T.nAddOff+'"><option value="1">'+T.nMin+'</option><option value="60">'+T.nHour+'</option><option value="1440">'+T.nDay+'</option></select><button class="btn sm" data-act="offadd" data-k="'+k+'">'+T.nAddBtn+'</button></div></div>';
+  }
+  function renderNotif(){
+    var top='';
+    if(!NS.native)top='<div class="warn">'+T.nOnlyApp+'</div>';
+    else{
+      if(NS.perm==='denied')top+='<div class="warn">'+T.nPermNo+'<br><button class="btn sm" data-act="nperm">'+T.nAllow+'</button></div>';
+      if(NS.exact==='denied')top+='<div class="warn" style="margin-top:10px">'+T.nExact+'<br><button class="btn sm" data-act="nexact">'+T.nExactBtn+'</button></div>';
+    }
+    app.innerHTML=topMain(T.nTitle,'')+(top?'<div style="margin-bottom:12px">'+top+'</div>':'')+
+      offPanel('lec',T.nLec,T.nLecHint)+offPanel('exam',T.nExam,T.nExamHint)+
+      '<button class="btn wide" data-act="ntest">'+T.nTest+'</button>';
+  }
+
+  /* ================= OCR ================= */
+  /*PARSE_START*/
+  function normDigits(s){
+    return String(s).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d);}).replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d);});
+  }
+  function codeRegex(code){
+    var chars=Array.from(normDigits(code).toUpperCase().replace(/[\s\-_.]/g,'')),parts=[];
+    chars.forEach(function(c){
+      if(c==='O'||c==='0')parts.push('[O0]');
+      else if(c==='I'||c==='L'||c==='1'||c==='|')parts.push('[IL1|]');
+      else parts.push(c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+    });
+    if(!parts.length)return null;
+    return new RegExp('(?<![A-Za-z0-9])'+parts.join('[\\s\\-_.]*')+'(?![A-Za-z0-9])','i');
+  }
+  function findDate(text,todayIso){
+    var m,y,mo,d,t=todayIso||'2026-01-01';
+    function mk(y,mo,d){if(mo<1||mo>12||d<1||d>31)return null;var dt=new Date(y,mo-1,d);if(dt.getMonth()!==mo-1)return null;return dt.getFullYear()+'-'+('0'+mo).slice(-2)+'-'+('0'+d).slice(-2);}
+    m=/(\d{4})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{1,2})/.exec(text);
+    if(m){var r=mk(+m[1],+m[2],+m[3]);if(r)return {iso:r,text:m[0]};}
+    m=/(\d{1,2})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{4}|\d{2})(?!\d)/.exec(text);
+    if(m){y=+m[3];if(y<100)y+=2000;var r2=mk(y,+m[2],+m[1]);if(r2)return {iso:r2,text:m[0]};}
+    m=/(?<![\d:])(\d{1,2})\s*[\/\-]\s*(\d{1,2})(?![\d:\/\-])/.exec(text);
+    if(m){
+      d=+m[1];mo=+m[2];
+      var ty=+t.slice(0,4);var r3=mk(ty,mo,d);
+      if(r3){var diff=(Date.UTC(+r3.slice(0,4),+r3.slice(5,7)-1,+r3.slice(8,10))-Date.UTC(ty,+t.slice(5,7)-1,+t.slice(8,10)))/86400000;
+        if(diff<-90)r3=mk(ty+1,mo,d);
+        if(r3)return {iso:r3,text:m[0]};}
+    }
+    return null;
+  }
+  function findTimes(text){
+    var re=/(\d{1,2})\s*[:.]\s*(\d{2})\s*(AM|PM|am|pm|A\.M\.|P\.M\.|ص|م)?/g,m,out=[];
+    while((m=re.exec(text))){
+      var h=+m[1],mi=+m[2];if(h>23||mi>59)continue;
+      var suf=m[3]?m[3].toLowerCase().replace(/\./g,''):'';
+      if(suf==='pm'||suf==='م'){if(h<12)h+=12;}
+      else if(suf==='am'||suf==='ص'){if(h===12)h=0;}
+      else if(h>=1&&h<=6)h+=12;
+      out.push({min:h*60+mi,text:m[0]});
+    }
+    return out;
+  }
+  function findRoom(text){
+    var m=/(?:قاعة|القاعة|قاعه|مدرج|معمل|مختبر|hall|room|rm|lab|amphi|theat(?:er|re))\.?\s*[:\-]?\s*([A-Za-z0-9\u0600-\u06FF]+(?:[\-\/][A-Za-z0-9]+)?)/i.exec(text);
+    return m?m[0].replace(/\s+/g,' ').trim():'';
+  }
+  function parseExamText(text,codes,todayIso){
+    var lines=normDigits(text).split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean);
+    var res=[];
+    codes.forEach(function(code){
+      var re=codeRegex(code),out={code:code,found:false,date:'',s:'',e:'',room:'',guessEnd:false,line:''};
+      if(!re){res.push(out);return;}
+      var idx=-1;
+      for(var i=0;i<lines.length;i++){if(re.test(lines[i])){idx=i;break;}}
+      if(idx<0){res.push(out);return;}
+      out.found=true;out.line=lines[idx];
+      var line=lines[idx].replace(re,' ');
+      var dt=findDate(line,todayIso);
+      if(!dt){
+        for(var k=idx-1;k>=0&&k>=idx-10;k--){dt=findDate(lines[k],todayIso);if(dt)break;}
+      }
+      var rest=line;
+      if(dt){out.date=dt.iso;rest=rest.replace(dt.text,' ');}
+      var times=findTimes(rest);
+      if(!times.length){
+        var nb=[lines[idx+1],lines[idx-1]];
+        for(var q=0;q<nb.length&&!times.length;q++){if(nb[q]&&!codeRegexAny(nb[q],codes)){times=findTimes(nb[q].replace(dt?dt.text:'',' '));}}
+      }
+      if(times.length){
+        out.s=times[0].min;
+        if(times.length>1){out.e=times[1].min;if(out.e<=out.s&&out.e<12*60)out.e+=12*60;if(out.e<=out.s)out.e='';}
+        if(out.e===''||times.length===1){out.e=Math.min(out.s+120,23*60+59);out.guessEnd=true;}
+        times.forEach(function(tm){rest=rest.replace(tm.text,' ');});
+      }
+      out.room=findRoom(rest);
+      res.push(out);
+    });
+    return res;
+  }
+  function codeRegexAny(line,codes){for(var i=0;i<codes.length;i++){var r=codeRegex(codes[i]);if(r&&r.test(line))return true;}return false;}
+  /*PARSE_END*/
+
+  function loadScript(src){
+    return new Promise(function(res,rej){
+      var s=document.createElement('script');s.src=src;s.onload=res;s.onerror=function(){rej(new Error('load'));};document.head.appendChild(s);
+    });
+  }
+  function prepImage(file){
+    return new Promise(function(res,rej){
+      var url=URL.createObjectURL(file),img=new Image();
+      img.onload=function(){
+        var w=img.naturalWidth,h=img.naturalHeight,sc=1;
+        if(Math.max(w,h)<1800)sc=1800/Math.max(w,h);
+        if(Math.max(w,h)*sc>3200)sc=3200/Math.max(w,h);
+        var c=document.createElement('canvas');c.width=Math.round(w*sc);c.height=Math.round(h*sc);
+        var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);
+        try{x.filter='grayscale(1) contrast(1.2)';}catch(e){}
+        x.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);res(c);
+      };
+      img.onerror=function(){URL.revokeObjectURL(url);rej(new Error('img'));};
+      img.src=url;
+    });
+  }
+  async function runOCR(){
+    if(!O.file){O.err=T.oNoImage;return renderOcr();}
+    if(!O.codes.length){O.err=T.oNoCodes;return renderOcr();}
+    O.err='';O.busy=true;O.pct=-1;O.results=null;renderOcr();
+    try{
+      if(typeof Tesseract==='undefined')await loadScript('vendor/tesseract/tesseract.min.js');
+      var canvas=await prepImage(O.file);
+      var worker=await Tesseract.createWorker(O.ara?'eng+ara':'eng',1,{
+        workerPath:'vendor/tesseract/worker.min.js',corePath:'vendor/tesseract-core',langPath:'vendor/tessdata',cacheMethod:'none',gzip:true,
+        logger:function(m){if(m&&m.status==='recognizing text'){O.pct=Math.round(m.progress*100);var b=$('pbar'),t=$('ptxt');if(b)b.style.width=O.pct+'%';if(t)t.textContent=T.oReading(O.pct);}}
+      });
+      try{await worker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'});}catch(e){}
+      var r=await worker.recognize(canvas);
+      try{await worker.terminate();}catch(e){}
+      O.raw=(r&&r.data&&r.data.text)||'';
+      var parsed=parseExamText(O.raw,O.codes,todayS());
+      O.results=parsed.map(function(p){
+        var c=courseFor('',p.code),name=c?c.name:p.code;
+        return {code:p.code,name:name,found:p.found,date:p.date,s:p.s===''?'':toHM(p.s),e:p.e===''?'':toHM(p.e),room:p.room,guess:p.guessEnd,inc:p.found,err:''};
+      });
+      O.busy=false;renderOcr();
+    }catch(e){
+      O.busy=false;
+      O.err=(typeof Tesseract==='undefined')?T.oNotReady:T.oFail;
+      renderOcr();
+    }
+  }
+  function openOcr(){
+    closeLayer();if(S.sample)purgeSampleExams();
+    var codes=[];S.courses.forEach(function(c){if(c.code)codes.push(c.code.toUpperCase());});
+    O={file:null,url:'',type:'fin',codes:codes,results:null,raw:'',busy:false,pct:-1,err:'',ara:false};
+    view='ocr';ret='exams';render();window.scrollTo(0,0);
+  }
+  function renderOcr(){
+    var chips=O.codes.map(function(c,i){return '<span class="chip plain">'+esc(c)+'<button data-act="codedel" data-i="'+i+'" aria-label="'+T.del+'">×</button></span>';}).join('');
+    var res='';
+    if(O.results){
+      res='<div class="panel"><h2>'+T.oResult+'</h2><p>'+T.oResultHint+'</p></div>'+O.results.map(function(r,i){
+        return '<div class="panel res"><div class="res-h"><label><input type="checkbox" data-r="inc" data-i="'+i+'"'+(r.inc?' checked':'')+' aria-label="'+T.oIncl+'"><b>'+esc(r.code)+'</b>'+(r.name!==r.code?' · '+esc(r.name):'')+'</label><span class="tg">'+(r.found?T.oFound:T.oMissing)+'</span></div>'+
+          '<div class="two"><label class="f">'+T.xDate+'<input type="date" data-r="date" data-i="'+i+'" value="'+esc(r.date)+'"></label><label class="f">'+T.room+'<input type="text" data-r="room" data-i="'+i+'" value="'+esc(r.room)+'"></label></div>'+
+          '<div class="two"><label class="f">'+T.from+'<input type="time" data-r="s" data-i="'+i+'" value="'+esc(r.s)+'"></label><label class="f">'+T.to+'<input type="time" data-r="e" data-i="'+i+'" value="'+esc(r.e)+'"></label></div>'+
+          (r.guess&&r.found?'<p>'+T.oGuessEnd+'</p>':'')+(r.err?'<div class="e">'+esc(r.err)+'</div>':'')+'</div>';
+      }).join('')+
+      '<details class="raw panel"><summary>'+T.oRaw+'</summary><pre>'+esc(O.raw)+'</pre></details>'+
+      '<button class="btn primary wide" data-act="oadd">'+T.oConfirm(O.results.filter(function(r){return r.inc;}).length)+'</button>';
+    }
+    app.innerHTML=topBack(T.oTitle)+
+      '<div class="panel"><p>'+T.oIntro+'</p></div>'+
+      '<div class="panel">'+
+        '<input id="ofile" type="file" accept="image/*" hidden>'+
+        (O.url?'<img class="thumb" src="'+O.url+'" alt="">':'')+
+        '<button class="btn" data-act="opick">'+(O.file?T.oChange:T.oPick)+'</button>'+
+        '<label for="otype">'+T.oType+'</label><select id="otype"><option value="mid"'+(O.type==='mid'?' selected':'')+'>'+T.xMid+'</option><option value="fin"'+(O.type==='fin'?' selected':'')+'>'+T.xFin+'</option></select>'+
+        '<label for="ocode">'+T.oCodes+'</label>'+(chips?'<div class="chips">'+chips+'</div>':'')+
+        '<div class="add-off" style="grid-template-columns:1fr auto"><input id="ocode" type="text" autocapitalize="characters" autocomplete="off" placeholder="'+T.oCodePh+'"><button class="btn sm" data-act="codeadd">'+T.oAddCode+'</button></div>'+
+        '<label style="display:flex;align-items:center;gap:8px;font-weight:400"><input id="oara" type="checkbox"'+(O.ara?' checked':'')+'>'+T.oUseAra+'</label>'+
+        (O.err?'<div class="err" role="alert">'+esc(O.err)+'</div>':'')+
+        (O.busy?'<div class="prog"><i id="pbar" style="width:'+(O.pct<0?4:O.pct)+'%"></i></div><p id="ptxt">'+(O.pct<0?T.oPrep:T.oReading(O.pct))+'</p>':'<button class="btn primary" data-act="orun">'+T.oRun+'</button>')+
+      '</div>'+res;
+    var f=$('ofile');if(f)f.addEventListener('change',function(){
+      if(f.files&&f.files[0]){if(O.url)URL.revokeObjectURL(O.url);O.file=f.files[0];O.url=URL.createObjectURL(O.file);O.results=null;O.err='';renderOcr();}
+    });
+    var ot=$('otype');if(ot)ot.addEventListener('change',function(){O.type=ot.value;});
+    var oa=$('oara');if(oa)oa.addEventListener('change',function(){O.ara=oa.checked;});
+  }
+  function addCodes(){
+    var inp=$('ocode');if(!inp)return;
+    inp.value.split(/[\s,،;]+/).forEach(function(c){c=c.trim().toUpperCase();if(c&&O.codes.indexOf(c)<0)O.codes.push(c);});
+    renderOcr();
+  }
+  function ocrAdd(){
+    var added=[],keep=[];
+    O.results.forEach(function(r){
+      if(!r.inc){keep.push(r);return;}
+      var cand={id:uid('x'),name:r.name,code:r.code,type:O.type,date:r.date,s:hm(r.s),e:hm(r.e),room:(r.room||'').trim()};
+      var m=(!r.date||cand.s==null||cand.e==null)?T.oFill:validateExam(cand,added);
+      if(m){r.err=m;keep.push(r);}else{added.push(cand);}
+    });
+    if(added.length){S.exams=S.exams.concat(added);changed();}
+    O.results=keep;
+    if(!keep.some(function(r){return r.inc;})&&added.length){toast(T.oAdded(added.length));go('exams');return;}
+    if(added.length)toast(T.oAdded(added.length));
+    renderOcr();
+  }
+
+  /* ================= router ================= */
+  function render(){
+    switch(view){
+      case 'exams':renderExams();break;
+      case 'notif':renderNotif();break;
+      case 'settings':renderSettings();break;
+      case 'form':renderForm();break;
+      case 'xform':renderXForm();break;
+      case 'wizard':renderWizard();break;
+      case 'ocr':renderOcr();break;
+      default:view='main';renderMain();
+    }
+  }
+  function go(v){closeLayer();view=v;render();window.scrollTo(0,0);}
+
+  /* ================= events ================= */
   document.addEventListener('click',function(ev){
-    var el=ev.target.closest('[data-act]'); if(!el) return;
-    var act=el.getAttribute('data-act'), id=el.getAttribute('data-id'), v=el.getAttribute('data-v');
-    if(act==='ovclose'&&ev.target!==el) return;
-    if(act==='sheet') sheet(id);
-    else if(act==='close'||act==='ovclose') layer.innerHTML='';
-    else if(act==='settings') settingsSheet();
-    else if(act==='lang'){P.lang=v;savePrefs();applyPrefs();renderMain();settingsSheet();}
-    else if(act==='theme'){P.theme=v;savePrefs();applyPrefs();settingsSheet();}
-    else if(act==='edit') openForm('edit',id);
-    else if(act==='askdel') askDelete(id);
-    else if(act==='del'){var c=find(id);S.courses=S.courses.filter(function(x){return x.id!==id;});save();layer.innerHTML='';toast(T.tDel(c?c.name:''));main();}
-    else if(act==='new'){ if(S.sample||!S.courses.length) startNew(); else askNew(); }
-    else if(act==='startnew') startNew();
-    else if(act==='add'){ if(S.sample) startNew(); else openForm('add'); }
-    else if(act==='done'||act==='back') main();
+    var el=ev.target.closest('[data-act]');if(!el)return;
+    var act=el.getAttribute('data-act'),id=el.getAttribute('data-id'),v=el.getAttribute('data-v'),k=el.getAttribute('data-k'),i=+el.getAttribute('data-i');
+    if((act==='ovclose'||act==='dclose')&&ev.target!==el)return;
+    switch(act){
+      case 'drawer':drawer();break;
+      case 'dclose':case 'ovclose':case 'close':closeLayer();break;
+      case 'nav':if(v==='wizard'){startNew();}else go(v);break;
+      case 'goback':go(ret);break;
+      case 'done':go('main');break;
+      case 'sheet':courseSheet(id);break;
+      case 'edit':openForm('edit',id);break;
+      case 'askdel':askDelete(id);break;
+      case 'del':{var c=S.courses.filter(function(x){return x.id===id;})[0];S.courses=S.courses.filter(function(x){return x.id!==id;});changed();closeLayer();toast(T.tDel(c?c.name:''));render();break;}
+      case 'new':startNew();break;
+      case 'startnew':openWizard();break;
+      case 'add':if(S.sample){clearSample();save();}openForm('add');break;
+      case 'wday':{var d=+v,ix=W.days.indexOf(d);if(ix>=0)W.days.splice(ix,1);else W.days.push(d);W.err='';renderWizard();break;}
+      case 'wadd':{var last=W.slots[W.slots.length-1],s0=last&&last.e!=null?last.e:480;W.slots.push({s:Math.min(s0,1380),e:Math.min(s0+90,1439)});W.err='';renderWizard();break;}
+      case 'wdel':W.slots.splice(i,1);W.err='';renderWizard();break;
+      case 'wdef':W.slots=defCfg().slots;W.days=defCfg().days;W.err='';renderWizard();break;
+      case 'wcreate':createSchedule();break;
+      case 'xnew':openXForm('add',{type:'mid'});break;
+      case 'xphoto':openOcr();break;
+      case 'xperiod':periodSheet();break;
+      case 'psave':{var f=$('pf').value,t=$('pt').value;
+        if(f&&t&&f>t){var e=$('perr');e.textContent=T.errPeriod;e.hidden=false;break;}
+        S.period={from:f,to:t};changed();closeLayer();toast(T.tPeriod);render();break;}
+      case 'pclear':S.period={from:'',to:''};changed();closeLayer();render();break;
+      case 'xsheet':examSheet(id);break;
+      case 'xedit':{var x=findExam(id);if(x)openXForm('edit',Object.assign({},x,{manualId:x.id}));break;}
+      case 'xfromd':{var x2=findExam(id);if(x2)openXForm('add',{name:x2.name,code:x2.code,type:x2.type,date:x2.date});break;}
+      case 'xcourse':openForm('edit',id);break;
+      case 'xaskdel':{var x3=findExam(id);if(x3)sheetWrap('<p>'+esc(T.xDelQ(x3.name))+'</p><div class="row"><button class="btn danger" data-act="xdel" data-id="'+esc(x3.id)+'">'+T.delFinal+'</button><button class="btn" data-act="xsheet" data-id="'+esc(x3.id)+'">'+T.cancel+'</button></div>',T.del,'alertdialog');break;}
+      case 'xdel':S.exams=S.exams.filter(function(e){return e.id!==id;});changed();closeLayer();toast(T.tXDel);render();break;
+      case 'lang':P.lang=v;savePrefs();applyPrefs();render();scheduleNotifs();break;
+      case 'theme':P.theme=v;savePrefs();applyPrefs();render();break;
+      case 'tfmt':P.t12=(v==='12');savePrefs();render();scheduleNotifs();break;
+      case 'ntoggle':P.n[k].on=!P.n[k].on;savePrefs();scheduleNotifs();render();break;
+      case 'offdel':P.n[k].offs.splice(i,1);savePrefs();scheduleNotifs();render();break;
+      case 'offadd':{
+        var n=Math.round(+$('offn-'+k).value),u=+$('offu-'+k).value;
+        if(!(n>0)){toast(T.nBadOff);break;}
+        var m=n*u;if(m>20160)m=20160;
+        if(P.n[k].offs.indexOf(m)<0){P.n[k].offs.push(m);P.n[k].offs.sort(function(a,b){return b-a;});}
+        P.n[k].offs=P.n[k].offs.slice(0,8);savePrefs();scheduleNotifs();render();break;}
+      case 'nperm':askPerm();break;
+      case 'nexact':openExact();break;
+      case 'ntest':testNotif();break;
+      case 'opick':{var fi=$('ofile');if(fi)fi.click();break;}
+      case 'codeadd':addCodes();break;
+      case 'codedel':O.codes.splice(i,1);renderOcr();break;
+      case 'orun':if(O.busy)break;{var oa=$('oara');if(oa)O.ara=oa.checked;}runOCR();break;
+      case 'oadd':ocrAdd();break;
+    }
+  });
+  document.addEventListener('input',function(ev){
+    var t=ev.target;
+    if(t.dataset&&t.dataset.w){var sl=W.slots[+t.dataset.i];if(sl){sl[t.dataset.w]=hm(t.value);W.err='';}}
+    else if(t.dataset&&t.dataset.r&&O&&O.results){var r=O.results[+t.dataset.i];if(r){var f=t.dataset.r;r[f]=(f==='inc')?t.checked:t.value;r.err='';}}
+  });
+  document.addEventListener('change',function(ev){
+    var t=ev.target;
+    if(t.dataset&&t.dataset.r==='inc'&&O&&O.results){O.results[+t.dataset.i].inc=t.checked;renderOcr();}
+  });
+  document.addEventListener('keydown',function(ev){
+    if(ev.key==='Enter'&&ev.target&&ev.target.id==='ocode'){ev.preventDefault();addCodes();}
   });
 
-  /* Android back button (only exists inside the installed app) */
+  function startNew(){
+    if(S.sample||!S.courses.length)openWizard();
+    else sheetWrap('<p>'+esc(T.newQ(S.courses.length))+'</p><div class="row"><button class="btn danger" data-act="startnew">'+T.newSched+'</button><button class="btn" data-act="close">'+T.cancel+'</button></div>',T.newSched,'alertdialog');
+  }
+
+  /* Android back button */
   try{
-    var A=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App;
+    var A=plugin('App');
     if(A&&A.addListener){
       A.addListener('backButton',function(){
-        if(splashOn) return;
-        if(layer.innerHTML){layer.innerHTML='';return;}
-        if(view==='form'){main();return;}
+        if(splashOn)return;
+        if(layer.innerHTML){closeLayer();return;}
+        if(view==='form'||view==='xform'||view==='wizard'||view==='ocr'){go(ret);return;}
+        if(view!=='main'){go('main');return;}
         A.exitApp();
       });
     }
   }catch(e){}
 
-  loadPrefs(); applyPrefs(); load(); renderSplash(); main();
+  function renderSplash(){
+    $('spLogo').innerHTML=logo('sp-logo');$('spT').textContent=T.title;$('spW').textContent=T.welcome;$('spS').textContent=T.welcomeSub;
+  }
+  window.__app={parse:parseExamText,get S(){return S;},get P(){return P;}};
+
+  loadPrefs();applyPrefs();load();renderSplash();render();
   setTimeout(function(){
     splash.className='out';
-    setTimeout(function(){splashOn=false;if(splash.parentNode)splash.parentNode.removeChild(splash);},500);
+    setTimeout(function(){splashOn=false;if(splash.parentNode)splash.parentNode.removeChild(splash);initNative();},500);
   },5000);
 })();
 </script>
