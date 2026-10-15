@@ -3,7 +3,7 @@
   "appName": "جدول المحاضرات",
   "webDir": "www",
   "android": {
-    "backgroundColor": "#EEF1F5",
+    "backgroundColor": "#0A0D12",
     "adjustMarginsForEdgeToEdge": "force"
   },
   "plugins": {

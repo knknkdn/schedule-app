@@ -17,5 +17,5 @@ fs.writeFileSync(mf, x);
 
 const dir = path.join('android', 'app', 'src', 'main', 'res', 'drawable');
 fs.mkdirSync(dir, { recursive: true });
-fs.copyFileSync(path.join('android-extra', 'ic_stat_schedule.xml'), path.join(dir, 'ic_stat_schedule.xml'));
+fs.copyFileSync(path.join('android-extra', 'ic_stat_schedule.png'), path.join(dir, 'ic_stat_schedule.png'));
 console.log('Android project patched');
