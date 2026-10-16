@@ -18,4 +18,32 @@ fs.writeFileSync(mf, x);
 const dir = path.join('android', 'app', 'src', 'main', 'res', 'drawable');
 fs.mkdirSync(dir, { recursive: true });
 fs.copyFileSync(path.join('android-extra', 'ic_stat_schedule.png'), path.join(dir, 'ic_stat_schedule.png'));
+
+// Dark launch colours: no white/system flash before the app's own opening screen.
+const resDir = path.join('android', 'app', 'src', 'main', 'res', 'values');
+fs.writeFileSync(path.join(resDir, 'jadwal_colors.xml'), '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="jadwal_dark">#0A0D12</color>\n</resources>\n');
+fs.writeFileSync(path.join(resDir, 'styles.xml'), `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:background">@null</item>
+        <item name="android:windowBackground">@color/jadwal_dark</item>
+        <item name="android:statusBarColor">@color/jadwal_dark</item>
+        <item name="android:navigationBarColor">@color/jadwal_dark</item>
+    </style>
+
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/jadwal_dark</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+        <item name="android:background">@drawable/splash</item>
+    </style>
+</resources>
+`);
 console.log('Android project patched');
