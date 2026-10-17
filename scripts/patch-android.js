@@ -41,6 +41,9 @@ fs.writeFileSync(path.join(resDir, 'styles.xml'), `<?xml version="1.0" encoding=
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/jadwal_dark</item>
+        <item name="android:windowBackground">@color/jadwal_dark</item>
+        <item name="android:statusBarColor">@color/jadwal_dark</item>
+        <item name="android:navigationBarColor">@color/jadwal_dark</item>
         <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
         <item name="android:background">@drawable/splash</item>
     </style>
